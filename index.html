@@ -1,0 +1,2032 @@
+<title>TWTavernPicks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rye&family=Space+Mono:wght@400;700&family=Zilla+Slab:wght@400;500;600;700&display=swap">
+<style>
+/* Saddle leather and turquoise: the two colours a rodeo actually wears.
+   Turquoise carries gains and oxblood carries losses - on theme, and still
+   the warm/cool split a reader expects from a ledger. */
+:root {
+  --paper:#F4EADB; --surface:#FBF5EC; --ink:#2B1C12; --muted:#7A6450;
+  --rule:#D3BFA4; --rule-soft:#E6D8C4; --accent:#8E2E20; --accent-soft:#EFE0CC;
+  --brass:#A8763C; --gain:#1F6F70; --loss:#8E2E20; --flat:#97836C;
+  --chip:#EBDFCC;
+  --shadow:0 1px 2px rgba(43,28,18,.07), 0 10px 26px -18px rgba(43,28,18,.4);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#16100B; --surface:#1E1610; --ink:#F2E5D2; --muted:#A08E77;
+    --rule:#3A2C20; --rule-soft:#2A2018; --accent:#D9694F; --accent-soft:#251A12;
+    --brass:#D2A257; --gain:#58B7AE; --loss:#D9694F; --flat:#7E6C58;
+    --chip:#251B14;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 26px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"] {
+  --paper:#16100B; --surface:#1E1610; --ink:#F2E5D2; --muted:#A08E77;
+  --rule:#3A2C20; --rule-soft:#2A2018; --accent:#D9694F; --accent-soft:#251A12;
+  --brass:#D2A257; --gain:#58B7AE; --loss:#D9694F; --flat:#7E6C58;
+  --chip:#251B14;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 26px -18px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Zilla Slab",Georgia,serif;font-size:15.5px;line-height:1.55;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:34px 24px 80px;
+  display:flex;flex-direction:column;gap:38px}
+a{color:inherit}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.14}
+h2,h3{font-family:"Zilla Slab",Georgia,serif;font-weight:700;
+  letter-spacing:-.01em}
+h2{font-size:24px}
+h3{font-size:17px}
+.num,.mono{font-family:"Space Mono",ui-monospace,monospace;
+  font-variant-numeric:tabular-nums}
+.gain{color:var(--gain)} .loss{color:var(--loss)} .flat{color:var(--flat)}
+
+/* the bill: a rodeo programme masthead, stacked and ruled */
+.bill{text-align:center;display:flex;flex-direction:column;align-items:center}
+.rule-double{width:100%;border-top:3px solid var(--ink);
+  border-bottom:1px solid var(--ink);height:5px}
+.bill-top,.bill-sub{font-family:"Space Mono",monospace;text-transform:uppercase;
+  letter-spacing:.22em;font-size:10.5px;color:var(--muted);margin:0}
+.bill-top{padding:12px 0 10px}
+.bill-sub{padding:8px 0 12px;color:var(--accent);letter-spacing:.2em;
+  font-size:11.5px;font-weight:700}
+h1{font-family:Rye,"Zilla Slab",Georgia,serif;font-weight:400;
+  font-size:clamp(26px,7vw,74px);color:var(--ink);line-height:1;
+  padding:4px 0 2px;letter-spacing:.01em}
+.star{color:var(--brass);font-size:13px;padding:0 10px}
+.lede{font-size:16.5px;color:var(--muted);max-width:62ch;margin:20px auto 0;
+  text-align:center}
+.meta{font-family:"Space Mono",monospace;font-size:11.5px;color:var(--muted);
+  margin-top:16px;display:flex;gap:8px 20px;flex-wrap:wrap;justify-content:center;
+  text-transform:uppercase;letter-spacing:.08em}
+
+/* section heads sit under a hairline, like programme sub-billing */
+section>h2{border-bottom:1px solid var(--rule);padding-bottom:8px}
+
+/* thesis: handbill panel, double-ruled */
+.thesis{background:var(--accent-soft);border:2px solid var(--ink);
+  padding:22px 24px;box-shadow:4px 4px 0 0 var(--rule)}
+.thesis h2{font-size:20px;margin-bottom:8px;border:0;
+  font-family:"Zilla Slab",Georgia,serif}
+.thesis p{margin:0;color:var(--ink);max-width:78ch}
+.thesis .names{font-family:"Space Mono",monospace;font-size:12.5px;
+  color:var(--muted);margin-top:10px}
+
+/* stat strip */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(158px,100%),1fr));
+  gap:1px;background:var(--rule);border:2px solid var(--ink);overflow:hidden}
+.strip div{background:var(--surface);padding:16px 18px;text-align:center}
+.strip span{display:block;font-family:"Space Mono",monospace;font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:6px}
+.strip b{font-family:"Space Mono",monospace;font-size:23px;font-weight:700;
+  font-variant-numeric:tabular-nums;color:var(--ink)}
+
+section>h2+p.sub{color:var(--muted);margin:6px 0 18px;max-width:70ch}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;max-width:100%;border:2px solid var(--ink);
+  background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink);font-weight:700;text-align:right;
+  padding:11px 12px;border-bottom:2px solid var(--ink);white-space:nowrap;
+  background:var(--chip);position:sticky;top:0}
+th:first-child,th:nth-child(2){text-align:left}
+td{padding:10px 12px;border-bottom:1px solid var(--rule-soft);text-align:right;
+  white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--chip)}
+td.rank{color:var(--brass);font-family:"Space Mono",monospace;font-weight:700;
+  text-align:left;width:34px}
+td.who,td.mkt,td.pick,td.who-sm{text-align:left;white-space:normal}
+td.who a{font-weight:600;text-decoration:none;border-bottom:1px solid var(--rule)}
+td.who a:hover{border-color:var(--accent);color:var(--accent)}
+td.mkt{min-width:270px;line-height:1.35}
+td.pick{font-weight:600;min-width:112px}
+td.who-sm{color:var(--muted);font-size:12px}
+.num{font-size:13px}
+/* branded like a stock tag: hot = fresh iron, proven = earned buckle */
+.chip{display:inline-block;margin-left:8px;font-family:"Space Mono",monospace;
+  font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;
+  background:var(--chip);color:var(--muted);font-weight:700;
+  border:1px solid var(--rule);vertical-align:1px}
+.chip.hot{color:var(--loss);border-color:var(--loss);background:transparent}
+.chip.proven{color:var(--gain);border-color:var(--gain);background:transparent}
+.sparkcell{width:148px;padding-right:14px}
+.spark{display:block}
+.spark polyline{fill:none;stroke-width:1.4;vector-effect:non-scaling-stroke}
+.spark.gain polyline,.spark.gain .sp-end{stroke:var(--gain);fill:none}
+.spark.loss polyline,.spark.loss .sp-end{stroke:var(--loss);fill:none}
+.sp-end{stroke-width:1.4}
+.sp-zero{stroke:var(--rule);stroke-width:1;stroke-dasharray:2 2;
+  vector-effect:non-scaling-stroke}
+
+/* cards */
+.cards{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.card{min-width:0;background:var(--surface);border:2px solid var(--ink);
+  padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.card-hd{display:flex;justify-content:space-between;align-items:flex-start;
+  gap:20px;min-width:0}
+.card-hd>div{min-width:0}
+.card-hd h3 a{text-decoration:none}
+.card-hd h3 a:hover{color:var(--accent)}
+.wallet{font-family:"Space Mono",monospace;font-size:11px;color:var(--muted);
+  margin:3px 0 0;word-break:break-all}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(138px,100%),1fr));
+  gap:14px;min-width:0}
+.stats span{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:3px}
+.stats b{font-family:"Space Mono",monospace;font-size:17px;font-weight:600;
+  font-variant-numeric:tabular-nums}
+.lgs{display:flex;flex-wrap:wrap;gap:7px}
+.lgbar{font-family:"Space Mono",monospace;font-size:11px;padding:3px 9px;
+  background:var(--chip);border:1px solid var(--rule);color:var(--muted)}
+.lgbar b{color:var(--ink);font-weight:600}
+td.mkt .lg{display:inline-block;font-family:"Space Mono",monospace;
+  font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);
+  border:1px solid var(--rule);padding:1px 5px;margin-right:7px}
+.more{font-size:12px;color:var(--muted);margin:0}
+
+/* league bars */
+.lrow{display:grid;grid-template-columns:110px 1fr 78px;align-items:center;gap:14px;
+  padding:7px 0;border-bottom:1px solid var(--rule-soft)}
+.lrow:last-child{border-bottom:0}
+.lrow span{font-size:13px}
+.lrow b{font-family:"Space Mono",monospace;font-size:12.5px;text-align:right;
+  font-weight:500;font-variant-numeric:tabular-nums}
+.bar{height:8px;background:var(--chip);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);}
+
+/* consensus + contested */
+td.tally{font-weight:600;color:var(--accent);text-align:right;width:52px}
+.num-sm{font-family:"Space Mono",monospace;font-size:11.5px;color:var(--muted)}
+.vs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));
+  gap:14px}
+.vs{min-width:0;background:var(--surface);border:2px solid var(--ink);
+  padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.vs-mkt{margin:0;font-size:13.5px;line-height:1.4;font-weight:600}
+.vs-mkt .lg{display:inline-block;font-family:"Space Mono",monospace;
+  font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);
+  border:1px solid var(--rule);padding:1px 5px;margin-right:7px;
+  vertical-align:1px;font-weight:500}
+.legs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr));
+  gap:10px}
+.leg{border:1px solid var(--rule);padding:10px 12px;
+  background:var(--chip)}
+.leg-hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+  font-size:13px}
+.leg-hd .num{color:var(--accent);font-weight:600}
+.leg-v{margin:6px 0 0;font-size:11.5px;color:var(--muted)}
+.leg-w{margin:4px 0 0;font-size:11px;color:var(--muted);
+  font-family:"Space Mono",monospace}
+.priming{background:var(--accent-soft);border:2px solid var(--ink);
+  padding:20px 22px;display:flex;flex-direction:column;gap:10px}
+.priming p{margin:0;max-width:76ch;font-size:14px}
+
+/* freshness + next run */
+#fresh.stale{color:var(--loss);font-weight:700}
+.nextrun.overdue{color:var(--loss)}
+#fresh.stale::before{content:"\26A0 ";}
+.nextrun{font-family:"Space Mono",monospace;font-size:12.5px;color:var(--accent);
+  margin:0 0 14px;letter-spacing:.03em;font-weight:700;min-height:1em}
+
+/* method */
+.method{border-top:2px solid var(--ink);padding-top:20px}
+.method h2{margin-bottom:14px}
+details{border-bottom:1px solid var(--rule-soft);padding:11px 0}
+summary{cursor:pointer;font-weight:600;font-size:14px;list-style:none;
+  display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:"Space Mono",monospace;color:var(--muted)}
+details[open] summary::after{content:"\2212"}
+details p{margin:9px 0 0;color:var(--muted);font-size:13.5px;max-width:78ch}
+code{font-family:"Space Mono",monospace;font-size:12px;background:var(--chip);
+  padding:1px 5px;border:1px solid var(--rule)}
+footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--rule);
+  padding-top:18px}
+@media (max-width:640px){
+  .wrap{padding:28px 14px 60px;gap:28px}
+  body{overflow-x:hidden}
+  .bill-top,.bill-sub{letter-spacing:.12em}
+  .wallet{font-size:9.5px}
+  .card-hd .spark{display:none}
+  .lrow{grid-template-columns:88px 1fr 66px;gap:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="bill">
+  <div class="rule-double"></div>
+  <p class="bill-top">Polymarket &middot; Public wallet reconciliation</p>
+  <h1>TWTavernPicks</h1>
+  <p class="bill-sub"><span class="star">&#10038;</span>Who is actually winning
+    on sports<span class="star">&#10038;</span></p>
+  <div class="rule-double"></div>
+  <p class="lede">Every Polymarket trade settles on a public wallet, so a
+    trader's record can be audited rather than taken on trust. This digest takes
+    the top 25 wallets on the sports leaderboard, pulls each one's
+    full equity history, and sets it against the positions they are holding
+    right now.</p>
+  <div class="meta">
+    <span id="fresh" data-generated="2026-09-10T14:03:05+00:00">Snapshot 10 Sep 2026, 14:03 UTC</span>
+    <span>History from 2026-07-23 &middot; 51 days</span>
+    <span>2,640 live positions</span>
+  </div>
+</header>
+
+
+
+<div class="thesis">
+  <h2>Today's leaderboard is not a record of skill</h2>
+  <p>Of the 25 wallets ranked highest on the sports leaderboard right
+    now, <b>4 are losing money over the tracked period</b>.
+    The board rewards a single good day; the equity curves show what happened on
+    all the others. The sparkline in each row is the honest version of the
+    ranking beside it.</p>
+  <p class="names">Ranked today, underwater lifetime &rarr; wr0ngw4yb3tt0r, Sassy-Bucket, hi774c, kekasaur</p>
+</div>
+
+<div class="strip">
+  <div><span>Wallets audited</span><b>25</b></div>
+  <div><span>Live sports risk</span><b>$2.92M</b></div>
+  <div><span>Open positions</span><b>2,640</b></div>
+  <div><span>Profitable lifetime</span><b>21/25</b></div>
+  <div><span>Cross-venue matches</span><b>4</b></div>
+</div>
+
+<section>
+  <h2>The ledger</h2>
+  <p class="sub">Ranked by today's sports leaderboard P&amp;L. Every column to the
+    right of it is the context the leaderboard leaves out. Sparklines show the
+    full equity curve, with a dashed line at break-even.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Trader</th><th>Board P&amp;L</th>
+        <th>Lifetime</th><th>30-day</th><th>Max drawdown</th><th>Win days</th>
+        <th>Live</th><th>Exposure</th><th>Equity curve</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="rank">1</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x7ad71d79a3bb90d0a87a06500fa0fe11663842aa" target="_blank" rel="noopener">theowalcott</a>
+          <span class="chip steady">Steady</span>
+        </td>
+        <td class="num gain">+$185k</td>
+        <td class="num gain">+$258k</td>
+        <td class="num gain">+$110k</td>
+        <td class="num loss">&minus;$787k</td>
+        <td class="num">40%</td>
+        <td class="num">0</td>
+        <td class="num">$0</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="20.7" x2="132" y2="20.7" class="sp-zero"/><polyline points="0.0,21.4 2.6,24.3 5.3,27.4 7.9,25.5 10.6,20.4 13.2,19.0 15.8,17.6 18.5,17.6 21.1,22.0 23.8,23.1 26.4,23.1 29.0,25.0 31.7,22.3 34.3,22.3 37.0,22.1 39.6,17.4 42.2,18.2 44.9,18.2 47.5,13.1 50.2,16.4 52.8,15.0 55.4,6.7 58.1,0.0 60.7,1.4 63.4,6.6 66.0,6.6 68.6,6.6 71.3,6.8 73.9,5.4 76.6,18.9 79.2,19.9 81.8,22.6 84.5,22.6 87.1,22.6 89.8,22.6 92.4,22.6 95.0,22.6 97.7,22.6 100.3,25.2 103.0,29.4 105.6,30.0 108.2,30.0 110.9,30.0 113.5,28.9 116.2,28.9 118.8,29.5 121.4,21.0 124.1,20.5 126.7,15.1 129.4,16.3 132.0,10.8"/><circle cx="132" cy="10.8" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">2</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x31e5d54aded22aa7cd80dbe9e33102abe2504879" target="_blank" rel="noopener">Noprajsk</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$183k</td>
+        <td class="num gain">+$991k</td>
+        <td class="num flat">&mdash;</td>
+        <td class="num loss">&minus;$114k</td>
+        <td class="num">67%</td>
+        <td class="num">1</td>
+        <td class="num">$273k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,30.0 44.0,9.4 88.0,0.0 132.0,3.2"/><circle cx="132" cy="3.2" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">3</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x924379a79c64b77ad5816ad362122a5f6228658e" target="_blank" rel="noopener">Kch-Temp</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$156k</td>
+        <td class="num gain">+$980k</td>
+        <td class="num gain">+$141k</td>
+        <td class="num loss">&minus;$1.11M</td>
+        <td class="num">32%</td>
+        <td class="num">3</td>
+        <td class="num">$157k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="14.4" x2="132" y2="14.4" class="sp-zero"/><polyline points="0.0,14.4 1.4,14.5 2.8,15.7 4.3,16.4 5.7,13.7 7.1,18.2 8.5,17.7 9.9,23.0 11.4,24.0 12.8,30.0 14.2,27.8 15.6,27.2 17.0,19.8 18.5,17.9 19.9,18.2 21.3,20.3 22.7,21.4 24.1,21.3 25.5,8.9 27.0,4.5 28.4,7.6 29.8,7.8 31.2,4.0 32.6,2.5 34.1,1.3 35.5,1.7 36.9,2.2 38.3,8.9 39.7,6.1 41.2,6.1 42.6,5.5 44.0,5.5 45.4,5.3 46.8,5.3 48.3,5.3 49.7,2.7 51.1,4.6 52.5,4.5 53.9,4.5 55.4,4.5 56.8,2.5 58.2,2.5 59.6,2.5 61.0,2.5 62.5,2.5 63.9,2.5 65.3,2.5 66.7,2.5 68.1,2.5 69.5,2.3 71.0,2.3 72.4,2.3 73.8,2.3 75.2,2.3 76.6,2.3 78.1,2.3 79.5,2.3 80.9,2.4 82.3,2.4 83.7,2.1 85.2,2.1 86.6,2.1 88.0,2.1 89.4,2.1 90.8,2.1 92.3,2.1 93.7,2.1 95.1,2.1 96.5,1.8 97.9,1.8 99.4,1.8 100.8,1.8 102.2,1.8 103.6,1.9 105.0,1.9 106.5,1.9 107.9,1.9 109.3,1.9 110.7,1.9 112.1,2.0 113.5,2.0 115.0,0.6 116.4,1.0 117.8,1.0 119.2,1.0 120.6,1.0 122.1,1.0 123.5,1.0 124.9,2.3 126.3,2.3 127.7,2.3 129.2,2.3 130.6,2.3 132.0,0.0"/><circle cx="132" cy="0.0" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">4</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0xf0318c32136c2db7fec88b84869aee6a1106c80c" target="_blank" rel="noopener">BreakTheBank</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$121k</td>
+        <td class="num gain">+$2.83M</td>
+        <td class="num loss">&minus;$4.53M</td>
+        <td class="num loss">&minus;$4.73M</td>
+        <td class="num">41%</td>
+        <td class="num">30</td>
+        <td class="num">$724k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="26.8" x2="132" y2="26.8" class="sp-zero"/><polyline points="0.0,26.8 0.6,26.4 1.1,25.4 1.7,25.2 2.3,25.7 2.9,26.4 3.4,26.7 4.0,27.5 4.6,27.5 5.1,27.5 5.7,27.5 6.3,27.5 6.9,27.5 7.4,27.6 8.0,26.8 8.6,27.0 9.1,27.0 9.7,27.0 10.3,27.0 10.9,27.0 11.4,27.0 12.0,27.0 12.6,28.0 13.1,28.0 13.7,28.0 14.3,28.0 14.9,28.0 15.4,28.0 16.0,28.0 16.6,28.0 17.1,28.0 17.7,28.0 18.3,28.0 18.9,28.0 19.4,28.0 20.0,28.0 20.6,28.0 21.1,28.0 21.7,28.0 22.3,28.0 22.9,28.0 23.4,28.0 24.0,28.0 24.6,28.0 25.1,28.0 25.7,28.0 26.3,28.0 26.9,28.0 27.4,28.0 28.0,28.0 28.6,28.0 29.1,28.0 29.7,28.0 30.3,28.0 30.9,28.0 31.4,28.0 32.0,28.0 32.6,28.0 33.1,28.0 33.7,28.0 34.3,28.0 34.9,28.0 35.4,28.0 36.0,28.0 36.6,28.0 37.1,28.0 37.7,28.0 38.3,28.0 38.9,28.0 39.4,28.0 40.0,28.0 40.6,28.0 41.1,28.0 41.7,28.0 42.3,28.0 42.9,28.0 43.4,28.0 44.0,28.0 44.6,28.0 45.1,28.0 45.7,28.0 46.3,28.0 46.9,28.0 47.4,28.0 48.0,28.0 48.6,28.0 49.1,28.0 49.7,28.0 50.3,28.0 50.9,28.0 51.4,28.0 52.0,28.0 52.6,28.0 53.1,28.0 53.7,28.0 54.3,28.0 54.9,28.0 55.4,28.0 56.0,28.0 56.6,28.0 57.1,28.0 57.7,28.0 58.3,28.0 58.9,28.0 59.4,28.0 60.0,28.0 60.6,28.0 61.1,28.0 61.7,28.0 62.3,28.0 62.9,28.0 63.4,28.0 64.0,27.9 64.6,27.6 65.1,28.0 65.7,28.4 66.3,28.6 66.9,29.0 67.4,29.2 68.0,30.0 68.6,30.0 69.1,30.0 69.7,30.0 70.3,30.0 70.9,30.0 71.4,30.0 72.0,30.0 72.6,30.0 73.1,30.0 73.7,30.0 74.3,30.0 74.9,30.0 75.4,30.0 76.0,30.0 76.6,30.0 77.1,30.0 77.7,30.0 78.3,30.0 78.9,30.0 79.4,30.0 80.0,29.6 80.6,26.6 81.1,29.1 81.7,27.0 82.3,22.2 82.9,23.0 83.4,15.0 84.0,16.2 84.6,22.8 85.1,25.4 85.7,20.6 86.3,14.7 86.9,11.9 87.4,12.8 88.0,16.4 88.6,16.5 89.1,15.8 89.7,15.5 90.3,11.6 90.9,10.7 91.4,10.4 92.0,13.4 92.6,19.8 93.1,18.6 93.7,20.2 94.3,16.8 94.9,14.9 95.4,14.9 96.0,14.2 96.6,17.6 97.1,18.9 97.7,16.7 98.3,16.5 98.9,12.9 99.4,15.0 100.0,14.7 100.6,13.6 101.1,8.3 101.7,1.5 102.3,1.5 102.9,2.3 103.4,2.3 104.0,2.3 104.6,2.3 105.1,2.2 105.7,2.2 106.3,2.2 106.9,2.2 107.4,2.3 108.0,2.3 108.6,1.9 109.1,1.9 109.7,1.9 110.3,1.9 110.9,1.9 111.4,1.9 112.0,0.1 112.6,0.7 113.1,0.6 113.7,0.1 114.3,0.1 114.9,0.0 115.4,2.3 116.0,2.4 116.6,2.4 117.1,1.9 117.7,9.9 118.3,9.7 118.9,9.7 119.4,10.5 120.0,11.4 120.6,10.6 121.1,12.3 121.7,11.4 122.3,13.8 122.9,13.9 123.4,15.5 124.0,15.6 124.6,16.1 125.1,14.1 125.7,17.2 126.3,17.2 126.9,17.2 127.4,17.2 128.0,17.2 128.6,16.9 129.1,17.0 129.7,16.6 130.3,16.3 130.9,15.2 131.4,16.9 132.0,16.5"/><circle cx="132" cy="16.5" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">5</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0xfe787d2da716d60e8acff57fb87eb13cd4d10319" target="_blank" rel="noopener">ferrariChampions2026</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$72k</td>
+        <td class="num gain">+$2.72M</td>
+        <td class="num gain">+$259k</td>
+        <td class="num loss">&minus;$3.67M</td>
+        <td class="num">62%</td>
+        <td class="num">83</td>
+        <td class="num">$134k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="29.2" x2="132" y2="29.2" class="sp-zero"/><polyline points="0.0,29.1 0.8,28.6 1.6,28.8 2.4,28.3 3.2,28.1 4.0,26.7 4.9,27.1 5.7,26.8 6.5,28.3 7.3,28.2 8.1,28.6 8.9,27.0 9.7,28.1 10.5,29.4 11.3,26.9 12.1,27.1 13.0,27.3 13.8,26.4 14.6,25.4 15.4,26.1 16.2,25.2 17.0,26.8 17.8,28.7 18.6,29.2 19.4,28.6 20.2,29.3 21.1,28.8 21.9,27.9 22.7,26.7 23.5,25.2 24.3,22.3 25.1,23.4 25.9,21.5 26.7,21.5 27.5,21.4 28.3,21.5 29.2,22.1 30.0,24.1 30.8,21.8 31.6,21.3 32.4,20.1 33.2,20.5 34.0,20.2 34.8,20.2 35.6,19.2 36.4,18.9 37.3,18.4 38.1,15.6 38.9,14.9 39.7,13.6 40.5,14.8 41.3,14.4 42.1,13.8 42.9,13.9 43.7,13.8 44.5,12.1 45.3,11.0 46.2,10.4 47.0,11.5 47.8,13.0 48.6,10.9 49.4,10.4 50.2,10.1 51.0,9.5 51.8,8.8 52.6,7.9 53.4,8.7 54.3,7.7 55.1,6.0 55.9,5.8 56.7,5.3 57.5,4.5 58.3,3.2 59.1,1.1 59.9,0.0 60.7,3.9 61.5,18.1 62.4,24.0 63.2,25.2 64.0,26.1 64.8,27.9 65.6,29.8 66.4,30.0 67.2,28.9 68.0,28.4 68.8,27.0 69.6,23.3 70.5,21.5 71.3,20.5 72.1,19.4 72.9,19.0 73.7,20.0 74.5,21.0 75.3,19.0 76.1,20.1 76.9,19.8 77.7,22.6 78.6,25.2 79.4,23.8 80.2,18.5 81.0,20.1 81.8,19.4 82.6,18.4 83.4,19.9 84.2,18.8 85.0,19.4 85.8,20.7 86.7,19.9 87.5,17.2 88.3,18.1 89.1,11.6 89.9,11.9 90.7,13.8 91.5,16.5 92.3,15.5 93.1,14.4 93.9,15.0 94.7,14.5 95.6,14.2 96.4,13.0 97.2,14.4 98.0,12.0 98.8,13.1 99.6,13.7 100.4,13.4 101.2,13.1 102.0,13.3 102.8,13.0 103.7,11.2 104.5,9.2 105.3,8.6 106.1,9.8 106.9,10.2 107.7,9.1 108.5,6.9 109.3,6.2 110.1,7.3 110.9,7.2 111.8,6.7 112.6,8.2 113.4,7.8 114.2,7.0 115.0,9.6 115.8,9.5 116.6,12.6 117.4,13.2 118.2,13.0 119.0,12.2 119.9,11.7 120.7,10.9 121.5,8.5 122.3,9.0 123.1,10.6 123.9,11.3 124.7,10.0 125.5,8.6 126.3,7.4 127.1,6.7 128.0,5.1 128.8,6.4 129.6,7.7 130.4,9.3 131.2,7.2 132.0,7.0"/><circle cx="132" cy="7.0" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">6</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x821dab0565ebf5b327f51db06223fdcfe01acf16" target="_blank" rel="noopener">Flaznorp</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$66k</td>
+        <td class="num gain">+$888k</td>
+        <td class="num flat">&mdash;</td>
+        <td class="num loss">&minus;$293k</td>
+        <td class="num">80%</td>
+        <td class="num">493</td>
+        <td class="num">$314k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,30.0 8.8,29.9 17.6,29.5 26.4,27.7 35.2,24.9 44.0,22.2 52.8,21.4 61.6,18.6 70.4,19.9 79.2,17.3 88.0,11.7 96.8,4.1 105.6,0.0 114.4,6.0 123.2,8.6 132.0,6.1"/><circle cx="132" cy="6.1" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">7</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x224a89dbe0db0d6124b335edabd15b3f877da3d5" target="_blank" rel="noopener">wr0ngw4yb3tt0r</a>
+          <span class="chip hot">Hot streak</span>
+        </td>
+        <td class="num gain">+$64k</td>
+        <td class="num loss">&minus;$4.46M</td>
+        <td class="num loss">&minus;$471k</td>
+        <td class="num loss">&minus;$8.12M</td>
+        <td class="num">44%</td>
+        <td class="num">15</td>
+        <td class="num">$84k</td>
+        <td class="sparkcell"><svg class="spark loss" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="0.9" x2="132" y2="0.9" class="sp-zero"/><polyline points="0.0,0.7 1.3,0.5 2.7,0.7 4.0,1.2 5.4,1.2 6.7,0.0 8.1,0.1 9.4,6.2 10.8,4.4 12.1,1.0 13.5,5.4 14.8,2.5 16.2,7.3 17.5,8.8 18.9,7.3 20.2,11.9 21.6,14.2 22.9,10.0 24.2,11.1 25.6,12.5 26.9,13.3 28.3,7.6 29.6,13.1 31.0,17.7 32.3,13.3 33.7,13.8 35.0,12.3 36.4,15.8 37.7,19.7 39.1,23.5 40.4,28.4 41.8,30.0 43.1,26.7 44.4,23.7 45.8,23.4 47.1,21.3 48.5,22.0 49.8,21.4 51.2,23.8 52.5,23.8 53.9,16.4 55.2,15.1 56.6,15.0 57.9,15.0 59.3,14.4 60.6,15.1 62.0,14.9 63.3,15.4 64.7,15.9 66.0,15.3 67.3,15.2 68.7,16.2 70.0,17.2 71.4,16.6 72.7,16.6 74.1,16.3 75.4,16.1 76.8,16.1 78.1,16.4 79.5,16.9 80.8,17.1 82.2,16.7 83.5,15.0 84.9,15.7 86.2,15.7 87.6,15.3 88.9,15.3 90.2,15.7 91.6,15.6 92.9,14.8 94.3,13.8 95.6,13.6 97.0,13.1 98.3,16.1 99.7,16.3 101.0,16.1 102.4,16.2 103.7,17.1 105.1,16.7 106.4,17.9 107.8,18.2 109.1,18.6 110.4,18.8 111.8,17.6 113.1,17.4 114.5,17.7 115.8,17.9 117.2,19.5 118.5,19.9 119.9,20.3 121.2,20.3 122.6,20.5 123.9,20.7 125.3,18.8 126.6,16.4 128.0,15.9 129.3,16.1 130.7,17.6 132.0,17.3"/><circle cx="132" cy="17.3" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">8</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x9703676286b93c2eca71ca96e8757104519a69c2" target="_blank" rel="noopener">AnonymousUsername</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$60k</td>
+        <td class="num gain">+$959k</td>
+        <td class="num gain">+$162k</td>
+        <td class="num loss">&minus;$832k</td>
+        <td class="num">60%</td>
+        <td class="num">137</td>
+        <td class="num">$64k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="25.7" x2="132" y2="25.7" class="sp-zero"/><polyline points="0.0,30.0 1.0,30.0 2.0,30.0 3.0,30.0 4.1,30.0 5.1,30.0 6.1,29.9 7.1,29.9 8.1,29.9 9.1,29.9 10.2,29.9 11.2,29.8 12.2,29.7 13.2,29.6 14.2,29.6 15.2,29.5 16.2,29.5 17.3,29.5 18.3,29.4 19.3,29.5 20.3,29.4 21.3,29.4 22.3,29.4 23.4,29.3 24.4,29.3 25.4,29.3 26.4,29.3 27.4,29.4 28.4,29.4 29.4,29.3 30.5,29.3 31.5,29.2 32.5,29.1 33.5,29.1 34.5,29.0 35.5,29.0 36.6,29.0 37.6,29.0 38.6,28.9 39.6,29.0 40.6,29.0 41.6,29.0 42.6,29.0 43.7,29.0 44.7,28.9 45.7,28.9 46.7,29.0 47.7,28.4 48.7,28.1 49.8,27.8 50.8,27.8 51.8,27.6 52.8,27.6 53.8,27.6 54.8,27.4 55.8,27.2 56.9,27.1 57.9,27.0 58.9,27.0 59.9,27.0 60.9,26.9 61.9,26.8 63.0,26.7 64.0,26.4 65.0,25.9 66.0,25.7 67.0,25.6 68.0,25.2 69.0,25.6 70.1,25.3 71.1,25.3 72.1,25.2 73.1,25.1 74.1,25.0 75.1,25.0 76.2,24.4 77.2,24.2 78.2,24.1 79.2,23.8 80.2,23.8 81.2,23.7 82.2,23.5 83.3,23.1 84.3,22.7 85.3,22.6 86.3,22.3 87.3,21.9 88.3,22.5 89.4,23.1 90.4,22.8 91.4,22.8 92.4,23.0 93.4,22.4 94.4,21.5 95.4,21.3 96.5,21.4 97.5,21.3 98.5,21.3 99.5,21.4 100.5,21.5 101.5,21.4 102.6,21.7 103.6,22.0 104.6,21.9 105.6,22.8 106.6,23.0 107.6,20.5 108.6,19.5 109.7,17.8 110.7,18.2 111.7,17.9 112.7,20.5 113.7,19.6 114.7,14.6 115.8,9.5 116.8,0.0 117.8,5.1 118.8,5.0 119.8,16.1 120.8,14.6 121.8,14.6 122.9,12.9 123.9,11.0 124.9,10.6 125.9,10.8 126.9,10.2 127.9,10.4 129.0,11.4 130.0,8.6 131.0,10.1 132.0,8.4"/><circle cx="132" cy="8.4" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">9</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x55a1f55fb021eb52f5233321f88ff8eca5aedb28" target="_blank" rel="noopener">vjnn</a>
+          <span class="chip steady">Steady</span>
+        </td>
+        <td class="num gain">+$55k</td>
+        <td class="num gain">+$38k</td>
+        <td class="num gain">+$130k</td>
+        <td class="num loss">&minus;$158k</td>
+        <td class="num">9%</td>
+        <td class="num">0</td>
+        <td class="num">$0</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="7.5" x2="132" y2="7.5" class="sp-zero"/><polyline points="0.0,7.5 1.0,9.4 2.0,10.0 3.0,9.4 4.1,3.4 5.1,0.0 6.1,7.9 7.1,6.2 8.1,14.5 9.1,16.8 10.2,17.6 11.2,18.6 12.2,19.2 13.2,19.2 14.2,19.7 15.2,19.7 16.2,20.4 17.3,21.5 18.3,21.5 19.3,21.5 20.3,21.5 21.3,21.5 22.3,21.5 23.4,21.5 24.4,21.5 25.4,21.5 26.4,21.5 27.4,21.5 28.4,21.5 29.4,21.5 30.5,21.5 31.5,21.5 32.5,21.5 33.5,21.5 34.5,21.5 35.5,21.5 36.6,21.5 37.6,21.5 38.6,21.5 39.6,21.5 40.6,21.5 41.6,21.5 42.6,21.5 43.7,21.5 44.7,21.5 45.7,21.5 46.7,21.5 47.7,21.5 48.7,21.5 49.8,21.5 50.8,21.5 51.8,21.5 52.8,21.5 53.8,21.5 54.8,21.5 55.8,21.5 56.9,21.5 57.9,21.5 58.9,21.5 59.9,21.5 60.9,21.5 61.9,21.5 63.0,21.5 64.0,21.5 65.0,21.5 66.0,21.5 67.0,21.5 68.0,21.5 69.0,21.5 70.1,21.5 71.1,21.5 72.1,21.5 73.1,21.5 74.1,21.5 75.1,21.5 76.2,21.5 77.2,21.5 78.2,21.5 79.2,21.0 80.2,23.4 81.2,23.4 82.2,23.4 83.3,22.6 84.3,23.6 85.3,23.6 86.3,20.1 87.3,15.4 88.3,1.5 89.4,10.7 90.4,19.0 91.4,17.6 92.4,21.0 93.4,21.0 94.4,20.9 95.4,21.0 96.5,23.3 97.5,23.3 98.5,24.2 99.5,24.2 100.5,24.2 101.5,25.1 102.6,25.1 103.6,25.1 104.6,25.1 105.6,25.1 106.6,25.1 107.6,25.1 108.6,25.1 109.7,25.1 110.7,25.1 111.7,25.1 112.7,25.1 113.7,25.1 114.7,25.1 115.8,25.1 116.8,25.1 117.8,25.1 118.8,25.1 119.8,25.1 120.8,25.1 121.8,25.1 122.9,25.1 123.9,25.1 124.9,25.1 125.9,25.1 126.9,24.0 127.9,28.9 129.0,30.0 130.0,30.0 131.0,30.0 132.0,0.3"/><circle cx="132" cy="0.3" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">10</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0xf1528f12e645462c344799b62b1b421a6a4c64aa" target="_blank" rel="noopener">phonesculptor</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$54k</td>
+        <td class="num gain">+$559k</td>
+        <td class="num loss">&minus;$7k</td>
+        <td class="num loss">&minus;$649k</td>
+        <td class="num">56%</td>
+        <td class="num">0</td>
+        <td class="num">$0</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="21.4" x2="132" y2="21.4" class="sp-zero"/><polyline points="0.0,21.6 0.8,21.6 1.6,21.6 2.4,22.0 3.2,21.2 4.0,21.7 4.8,19.3 5.6,18.7 6.4,18.9 7.2,18.6 8.0,21.1 8.7,21.1 9.5,20.1 10.3,22.2 11.1,22.2 11.9,23.0 12.7,23.2 13.5,23.1 14.3,22.6 15.1,22.1 15.9,23.0 16.7,22.9 17.5,22.9 18.3,23.0 19.1,21.4 19.9,21.5 20.7,22.3 21.5,22.6 22.3,23.7 23.1,24.0 23.9,23.8 24.7,23.3 25.4,23.6 26.2,23.8 27.0,22.4 27.8,23.3 28.6,23.7 29.4,22.7 30.2,23.6 31.0,23.2 31.8,22.7 32.6,21.7 33.4,22.2 34.2,23.5 35.0,25.6 35.8,23.9 36.6,23.3 37.4,23.5 38.2,22.9 39.0,22.2 39.8,20.6 40.6,21.2 41.3,19.0 42.1,17.4 42.9,17.4 43.7,21.5 44.5,20.0 45.3,20.2 46.1,19.3 46.9,15.6 47.7,14.4 48.5,13.5 49.3,14.6 50.1,15.5 50.9,16.2 51.7,14.2 52.5,21.5 53.3,21.7 54.1,21.3 54.9,24.8 55.7,27.6 56.5,27.6 57.3,27.4 58.0,27.2 58.8,26.8 59.6,26.4 60.4,26.5 61.2,27.2 62.0,27.0 62.8,26.4 63.6,26.8 64.4,26.4 65.2,26.5 66.0,25.7 66.8,25.0 67.6,24.7 68.4,25.4 69.2,25.4 70.0,25.1 70.8,30.0 71.6,23.8 72.4,21.9 73.2,22.3 74.0,21.8 74.7,21.3 75.5,19.9 76.3,19.6 77.1,21.4 77.9,23.0 78.7,20.1 79.5,21.1 80.3,19.8 81.1,19.3 81.9,19.2 82.7,16.7 83.5,16.9 84.3,20.9 85.1,19.4 85.9,17.3 86.7,16.8 87.5,17.8 88.3,21.6 89.1,21.3 89.9,11.8 90.7,10.3 91.4,7.4 92.2,7.7 93.0,8.5 93.8,7.9 94.6,4.8 95.4,6.0 96.2,3.7 97.0,2.5 97.8,3.2 98.6,5.0 99.4,4.3 100.2,3.8 101.0,4.6 101.8,5.1 102.6,7.2 103.4,8.3 104.2,6.0 105.0,1.8 105.8,1.7 106.6,0.0 107.3,0.1 108.1,0.8 108.9,0.7 109.7,0.7 110.5,1.5 111.3,2.4 112.1,1.7 112.9,2.6 113.7,3.1 114.5,2.9 115.3,3.0 116.1,3.3 116.9,1.5 117.7,3.9 118.5,4.7 119.3,5.4 120.1,6.3 120.9,8.4 121.7,8.3 122.5,8.5 123.3,7.9 124.0,7.3 124.8,7.1 125.6,7.9 126.4,8.3 127.2,9.2 128.0,8.6 128.8,9.2 129.6,8.8 130.4,7.9 131.2,7.6 132.0,6.5"/><circle cx="132" cy="6.5" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">11</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x78becf0a4e4f2640380af0c19ad32e2557e6bde0" target="_blank" rel="noopener">0x78be&#8230;bde0</a>
+          <span class="chip steady">Steady</span>
+        </td>
+        <td class="num gain">+$51k</td>
+        <td class="num gain">+$322k</td>
+        <td class="num flat">&mdash;</td>
+        <td class="num loss">&minus;$408k</td>
+        <td class="num">71%</td>
+        <td class="num">2</td>
+        <td class="num">$29k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,30.0 18.9,26.3 37.7,27.9 56.6,23.2 75.4,13.3 94.3,0.0 113.1,18.7 132.0,16.0"/><circle cx="132" cy="16.0" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">12</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x4bff30af91642dc7d2b19a8664378fe55c45fc26" target="_blank" rel="noopener">Sassy-Bucket</a>
+          <span class="chip hot">Hot streak</span>
+        </td>
+        <td class="num gain">+$49k</td>
+        <td class="num loss">&minus;$2.13M</td>
+        <td class="num gain">+$929k</td>
+        <td class="num loss">&minus;$3.92M</td>
+        <td class="num">43%</td>
+        <td class="num">0</td>
+        <td class="num">$0</td>
+        <td class="sparkcell"><svg class="spark loss" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="1.2" x2="132" y2="1.2" class="sp-zero"/><polyline points="0.0,0.0 1.0,5.9 1.9,3.3 2.9,5.2 3.8,5.2 4.8,5.1 5.7,4.1 6.7,4.6 7.7,10.0 8.6,11.1 9.6,11.9 10.5,14.5 11.5,13.4 12.4,16.6 13.4,14.6 14.3,17.1 15.3,18.2 16.3,23.2 17.2,23.2 18.2,23.9 19.1,23.9 20.1,26.0 21.0,24.9 22.0,22.2 23.0,21.6 23.9,20.2 24.9,21.3 25.8,22.5 26.8,21.2 27.7,19.7 28.7,20.9 29.7,22.2 30.6,22.6 31.6,25.1 32.5,25.7 33.5,24.1 34.4,26.7 35.4,26.7 36.3,26.7 37.3,26.7 38.3,27.6 39.2,28.1 40.2,28.1 41.1,25.0 42.1,25.2 43.0,27.3 44.0,25.5 45.0,23.3 45.9,22.6 46.9,22.7 47.8,24.2 48.8,22.3 49.7,22.9 50.7,23.9 51.7,21.0 52.6,20.9 53.6,22.3 54.5,19.3 55.5,19.0 56.4,17.4 57.4,18.9 58.3,19.9 59.3,22.0 60.3,20.5 61.2,21.8 62.2,21.8 63.1,21.4 64.1,23.2 65.0,21.6 66.0,23.9 67.0,26.3 67.9,27.4 68.9,25.5 69.8,27.2 70.8,24.1 71.7,27.0 72.7,24.1 73.7,28.7 74.6,29.1 75.6,29.1 76.5,29.1 77.5,29.1 78.4,29.1 79.4,29.1 80.3,29.3 81.3,29.3 82.3,30.0 83.2,28.0 84.2,24.4 85.1,24.7 86.1,24.7 87.0,27.2 88.0,27.5 89.0,27.5 89.9,27.5 90.9,27.5 91.8,27.5 92.8,27.5 93.7,27.5 94.7,27.5 95.7,27.5 96.6,27.5 97.6,27.6 98.5,26.1 99.5,27.8 100.4,26.4 101.4,25.4 102.3,25.0 103.3,24.7 104.3,25.2 105.2,24.0 106.2,25.0 107.1,21.6 108.1,19.5 109.0,18.8 110.0,19.1 111.0,19.8 111.9,19.9 112.9,20.4 113.8,19.4 114.8,18.0 115.7,18.3 116.7,18.2 117.7,19.3 118.6,18.8 119.6,20.4 120.5,19.7 121.5,17.0 122.4,17.0 123.4,17.2 124.3,14.8 125.3,13.2 126.3,13.5 127.2,17.7 128.2,17.7 129.1,18.2 130.1,18.3 131.0,18.0 132.0,17.6"/><circle cx="132" cy="17.6" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">13</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0xb4f978be63cdf75554b0b46a4262a6db597cc9a7" target="_blank" rel="noopener">0xb4f9&#8230;c9a7</a>
+          <span class="chip steady">Steady</span>
+        </td>
+        <td class="num gain">+$43k</td>
+        <td class="num gain">+$107k</td>
+        <td class="num gain">+$86k</td>
+        <td class="num loss">&minus;$28k</td>
+        <td class="num">43%</td>
+        <td class="num">5</td>
+        <td class="num">$13k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="29.2" x2="132" y2="29.2" class="sp-zero"/><polyline points="0.0,29.2 1.2,29.2 2.3,29.2 3.5,29.2 4.7,29.2 5.8,29.2 7.0,29.2 8.2,29.2 9.3,29.2 10.5,29.2 11.7,29.2 12.8,29.2 14.0,29.2 15.2,29.2 16.4,29.2 17.5,29.2 18.7,29.2 19.9,29.2 21.0,29.2 22.2,29.2 23.4,29.2 24.5,29.2 25.7,29.2 26.9,29.2 28.0,29.2 29.2,29.2 30.4,29.2 31.5,29.2 32.7,29.2 33.9,29.2 35.0,29.2 36.2,29.2 37.4,29.2 38.5,29.2 39.7,29.2 40.9,29.2 42.1,29.2 43.2,29.2 44.4,29.2 45.6,29.2 46.7,29.2 47.9,29.2 49.1,29.2 50.2,29.2 51.4,29.2 52.6,29.2 53.7,29.2 54.9,29.2 56.1,29.2 57.2,29.2 58.4,29.2 59.6,29.2 60.7,28.9 61.9,28.9 63.1,28.9 64.2,28.9 65.4,28.9 66.6,28.9 67.8,28.9 68.9,29.0 70.1,29.0 71.3,29.0 72.4,28.9 73.6,29.0 74.8,29.0 75.9,29.0 77.1,29.0 78.3,29.0 79.4,29.0 80.6,29.0 81.8,29.0 82.9,29.0 84.1,29.3 85.3,29.8 86.4,26.9 87.6,26.9 88.8,27.1 89.9,27.0 91.1,27.5 92.3,28.3 93.5,28.3 94.6,28.5 95.8,28.4 97.0,23.3 98.1,28.0 99.3,28.0 100.5,27.9 101.6,26.6 102.8,26.7 104.0,26.7 105.1,26.7 106.3,24.1 107.5,22.6 108.6,22.5 109.8,24.3 111.0,24.2 112.1,27.5 113.3,29.7 114.5,30.0 115.6,28.7 116.8,28.0 118.0,16.3 119.2,14.2 120.3,14.0 121.5,17.9 122.7,17.8 123.8,17.5 125.0,18.3 126.2,10.6 127.3,10.4 128.5,10.3 129.7,10.6 130.8,11.6 132.0,0.0"/><circle cx="132" cy="0.0" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">14</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0xd106952ebf30a3125affd8a23b6c1f30c35fc79c" target="_blank" rel="noopener">Herdonia</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$36k</td>
+        <td class="num gain">+$722k</td>
+        <td class="num gain">+$52k</td>
+        <td class="num loss">&minus;$351k</td>
+        <td class="num">53%</td>
+        <td class="num">34</td>
+        <td class="num">$10k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="20.5" x2="132" y2="20.5" class="sp-zero"/><polyline points="0.0,20.5 0.6,20.2 1.1,21.5 1.7,20.7 2.3,22.9 2.9,22.1 3.4,21.6 4.0,22.3 4.6,22.7 5.1,24.0 5.7,24.3 6.3,21.9 6.9,22.4 7.4,22.7 8.0,24.9 8.6,24.3 9.1,28.9 9.7,25.1 10.3,26.1 10.9,24.2 11.4,21.9 12.0,24.3 12.6,28.0 13.1,28.0 13.7,28.0 14.3,28.0 14.9,28.0 15.4,28.0 16.0,28.0 16.6,26.3 17.1,23.5 17.7,26.5 18.3,28.2 18.9,26.6 19.4,28.5 20.0,25.8 20.6,25.0 21.1,21.8 21.7,23.3 22.3,25.7 22.9,24.0 23.4,21.6 24.0,21.3 24.6,21.4 25.1,22.0 25.7,26.8 26.3,27.3 26.9,24.4 27.4,24.5 28.0,28.0 28.6,29.6 29.1,28.0 29.7,30.0 30.3,30.0 30.9,25.9 31.4,22.7 32.0,20.4 32.6,20.2 33.1,19.7 33.7,21.1 34.3,23.4 34.9,19.0 35.4,18.9 36.0,16.7 36.6,12.0 37.1,14.7 37.7,17.1 38.3,15.4 38.9,16.1 39.4,15.1 40.0,15.7 40.6,13.8 41.1,12.3 41.7,11.5 42.3,10.2 42.9,8.3 43.4,5.4 44.0,3.2 44.6,4.4 45.1,7.1 45.7,7.2 46.3,7.0 46.9,7.4 47.4,7.2 48.0,5.7 48.6,4.9 49.1,7.1 49.7,5.9 50.3,4.7 50.9,4.2 51.4,2.5 52.0,3.1 52.6,3.6 53.1,3.2 53.7,3.6 54.3,2.6 54.9,3.4 55.4,3.4 56.0,3.6 56.6,4.9 57.1,3.1 57.7,4.7 58.3,4.3 58.9,4.4 59.4,4.0 60.0,3.7 60.6,4.4 61.1,5.8 61.7,6.1 62.3,3.6 62.9,2.1 63.4,0.3 64.0,0.0 64.6,0.5 65.1,0.3 65.7,0.4 66.3,1.0 66.9,4.3 67.4,4.5 68.0,2.2 68.6,2.1 69.1,2.3 69.7,3.1 70.3,2.6 70.9,2.3 71.4,2.1 72.0,2.4 72.6,2.9 73.1,2.9 73.7,3.1 74.3,3.2 74.9,2.9 75.4,3.4 76.0,3.8 76.6,3.8 77.1,4.0 77.7,3.8 78.3,3.8 78.9,4.0 79.4,4.1 80.0,3.7 80.6,3.6 81.1,3.5 81.7,3.9 82.3,4.4 82.9,4.4 83.4,4.6 84.0,4.4 84.6,4.3 85.1,4.4 85.7,4.2 86.3,4.0 86.9,4.4 87.4,4.0 88.0,4.3 88.6,4.3 89.1,4.0 89.7,3.9 90.3,4.0 90.9,3.4 91.4,3.4 92.0,3.1 92.6,3.5 93.1,2.9 93.7,2.6 94.3,2.6 94.9,2.9 95.4,2.5 96.0,2.2 96.6,2.0 97.1,2.0 97.7,2.0 98.3,2.0 98.9,2.0 99.4,2.0 100.0,2.0 100.6,2.0 101.1,2.0 101.7,2.0 102.3,2.0 102.9,2.0 103.4,2.0 104.0,2.0 104.6,2.0 105.1,2.0 105.7,2.0 106.3,2.0 106.9,2.0 107.4,2.0 108.0,2.0 108.6,2.0 109.1,1.9 109.7,1.9 110.3,2.0 110.9,1.9 111.4,1.9 112.0,1.8 112.6,1.8 113.1,1.8 113.7,1.9 114.3,1.9 114.9,1.9 115.4,1.9 116.0,1.8 116.6,1.8 117.1,1.9 117.7,2.0 118.3,2.1 118.9,2.0 119.4,1.9 120.0,1.8 120.6,1.8 121.1,1.8 121.7,1.8 122.3,1.8 122.9,1.8 123.4,1.7 124.0,1.7 124.6,1.7 125.1,1.5 125.7,1.4 126.3,1.4 126.9,1.5 127.4,1.4 128.0,1.4 128.6,1.4 129.1,1.4 129.7,1.4 130.3,1.4 130.9,1.5 131.4,1.4 132.0,0.4"/><circle cx="132" cy="0.4" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">15</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0xdc41c39b95453c943174f369926018f6963bdd7e" target="_blank" rel="noopener">nigiri99</a>
+          <span class="chip steady">Steady</span>
+        </td>
+        <td class="num gain">+$33k</td>
+        <td class="num gain">+$378k</td>
+        <td class="num gain">+$909k</td>
+        <td class="num loss">&minus;$1.01M</td>
+        <td class="num">23%</td>
+        <td class="num">475</td>
+        <td class="num">$338k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="8.3" x2="132" y2="8.3" class="sp-zero"/><polyline points="0.0,7.8 0.8,14.9 1.6,13.0 2.4,13.3 3.2,13.3 4.0,13.3 4.8,13.3 5.6,13.3 6.4,13.3 7.2,13.3 8.0,13.3 8.9,13.3 9.7,13.3 10.5,13.3 11.3,13.3 12.1,13.3 12.9,13.3 13.7,13.3 14.5,13.3 15.3,13.3 16.1,13.3 16.9,13.3 17.7,13.3 18.5,13.3 19.3,13.3 20.1,13.3 20.9,13.3 21.7,13.3 22.5,13.3 23.3,13.3 24.1,13.3 25.0,13.3 25.8,13.3 26.6,13.3 27.4,13.3 28.2,13.3 29.0,13.3 29.8,13.3 30.6,13.3 31.4,13.3 32.2,13.3 33.0,13.3 33.8,13.3 34.6,13.3 35.4,13.3 36.2,13.3 37.0,13.3 37.8,13.3 38.6,13.3 39.4,13.3 40.2,13.3 41.0,13.3 41.9,13.3 42.7,13.3 43.5,13.3 44.3,13.3 45.1,13.3 45.9,13.3 46.7,13.3 47.5,13.3 48.3,13.3 49.1,13.3 49.9,13.3 50.7,13.3 51.5,13.3 52.3,13.3 53.1,13.3 53.9,13.3 54.7,13.3 55.5,13.3 56.3,13.3 57.1,13.3 58.0,13.3 58.8,13.3 59.6,13.3 60.4,13.3 61.2,13.3 62.0,13.3 62.8,13.3 63.6,13.3 64.4,13.3 65.2,13.3 66.0,13.3 66.8,13.3 67.6,13.3 68.4,13.3 69.2,13.3 70.0,13.3 70.8,13.3 71.6,13.3 72.4,13.3 73.2,13.3 74.0,13.3 74.9,13.3 75.7,13.3 76.5,13.3 77.3,13.3 78.1,13.3 78.9,13.3 79.7,13.3 80.5,13.3 81.3,12.9 82.1,13.0 82.9,13.0 83.7,13.0 84.5,13.0 85.3,17.2 86.1,15.8 86.9,15.8 87.7,15.9 88.5,15.8 89.3,21.5 90.1,21.6 91.0,21.6 91.8,21.4 92.6,21.4 93.4,21.4 94.2,22.5 95.0,21.6 95.8,24.8 96.6,24.5 97.4,25.9 98.2,25.9 99.0,25.9 99.8,26.3 100.6,28.3 101.4,26.6 102.2,28.2 103.0,29.8 103.8,30.0 104.6,27.1 105.4,23.5 106.2,25.1 107.0,20.6 107.9,20.1 108.7,23.3 109.5,23.6 110.3,27.0 111.1,27.5 111.9,27.6 112.7,28.8 113.5,27.9 114.3,26.4 115.1,25.5 115.9,24.9 116.7,21.0 117.5,20.5 118.3,18.3 119.1,19.7 119.9,17.3 120.7,14.1 121.5,12.3 122.3,5.3 123.1,2.3 124.0,2.1 124.8,3.6 125.6,6.5 126.4,8.0 127.2,9.9 128.0,10.3 128.8,6.2 129.6,7.2 130.4,9.2 131.2,0.9 132.0,0.0"/><circle cx="132" cy="0.0" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">16</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x121fd10502fbd639a491a4e5779bca49508c15c1" target="_blank" rel="noopener">chongchongpanda</a>
+          <span class="chip steady">Steady</span>
+        </td>
+        <td class="num gain">+$31k</td>
+        <td class="num gain">+$21k</td>
+        <td class="num flat">&mdash;</td>
+        <td class="num loss">&minus;$23k</td>
+        <td class="num">70%</td>
+        <td class="num">142</td>
+        <td class="num">$126k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="15.6" x2="132" y2="15.6" class="sp-zero"/><polyline points="0.0,15.5 5.7,15.4 11.5,15.2 17.2,15.2 23.0,15.1 28.7,15.1 34.4,15.2 40.2,14.5 45.9,13.4 51.7,13.8 57.4,29.8 63.1,29.3 68.9,29.1 74.6,29.9 80.3,29.2 86.1,29.6 91.8,30.0 97.6,24.9 103.3,24.6 109.0,24.3 114.8,24.0 120.5,22.1 126.3,22.4 132.0,0.0"/><circle cx="132" cy="0.0" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">17</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x5268527977f700f9bf9b6d5cd843859e4e70135d" target="_blank" rel="noopener">HomeRunHazard</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$25k</td>
+        <td class="num gain">+$2.44M</td>
+        <td class="num gain">+$428k</td>
+        <td class="num loss">&minus;$353k</td>
+        <td class="num">62%</td>
+        <td class="num">154</td>
+        <td class="num">$74k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="28.4" x2="132" y2="28.4" class="sp-zero"/><polyline points="0.0,28.4 0.9,28.2 1.9,28.1 2.8,28.1 3.8,28.8 4.7,28.7 5.7,28.6 6.6,28.6 7.6,28.6 8.5,28.6 9.5,28.6 10.4,28.6 11.4,28.7 12.3,30.0 13.3,29.4 14.2,28.0 15.2,29.4 16.1,29.4 17.1,29.6 18.0,28.9 19.0,27.2 19.9,27.3 20.9,27.6 21.8,27.2 22.8,27.0 23.7,27.5 24.7,27.1 25.6,26.9 26.6,25.9 27.5,25.3 28.5,25.3 29.4,25.1 30.4,24.7 31.3,23.3 32.3,24.6 33.2,24.5 34.2,24.0 35.1,22.4 36.1,21.7 37.0,21.7 38.0,22.8 38.9,22.6 39.9,21.6 40.8,19.3 41.8,18.5 42.7,18.6 43.7,16.9 44.6,17.3 45.6,17.3 46.5,17.5 47.5,17.4 48.4,16.6 49.4,16.9 50.3,17.1 51.3,16.4 52.2,16.1 53.2,16.0 54.1,17.9 55.1,18.1 56.0,18.1 57.0,18.9 57.9,18.9 58.9,18.5 59.8,18.8 60.8,19.4 61.7,18.5 62.7,18.7 63.6,18.5 64.6,19.1 65.5,19.1 66.5,18.5 67.4,16.9 68.4,17.6 69.3,18.3 70.3,18.5 71.2,18.1 72.2,17.5 73.1,17.5 74.1,16.8 75.0,16.1 76.0,15.5 76.9,15.8 77.9,15.9 78.8,15.6 79.8,15.7 80.7,14.5 81.7,13.8 82.6,13.8 83.6,14.6 84.5,14.4 85.5,13.7 86.4,14.1 87.4,15.1 88.3,13.6 89.3,13.5 90.2,14.6 91.2,13.8 92.1,14.0 93.1,12.9 94.0,12.5 95.0,11.8 95.9,12.0 96.9,11.9 97.8,9.7 98.8,9.3 99.7,8.0 100.7,8.0 101.6,8.6 102.6,8.1 103.5,7.8 104.5,7.3 105.4,7.3 106.4,8.3 107.3,9.2 108.3,7.5 109.2,7.8 110.2,6.0 111.1,5.4 112.1,6.1 113.0,7.4 114.0,6.4 114.9,5.2 115.9,5.0 116.8,5.3 117.8,4.0 118.7,3.9 119.7,3.0 120.6,0.0 121.6,0.3 122.5,1.3 123.5,1.9 124.4,3.0 125.4,3.3 126.3,3.2 127.3,2.8 128.2,2.6 129.2,2.4 130.1,3.6 131.1,3.6 132.0,3.4"/><circle cx="132" cy="3.4" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">18</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x75f204b39709544f763ca68c2e3f4a60a309ff6d" target="_blank" rel="noopener">Runemup</a>
+          <span class="chip steady">Steady</span>
+        </td>
+        <td class="num gain">+$23k</td>
+        <td class="num gain">+$30k</td>
+        <td class="num flat">&mdash;</td>
+        <td class="num loss">&minus;$25k</td>
+        <td class="num">60%</td>
+        <td class="num">1</td>
+        <td class="num">$10k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="22.0" x2="132" y2="22.0" class="sp-zero"/><polyline points="0.0,30.0 26.4,13.5 52.8,0.0 79.2,9.0 105.6,15.8 132.0,3.3"/><circle cx="132" cy="3.3" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">19</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0xf7f0b0b1e9c0fe02ccad926916ee31aef74b912c" target="_blank" rel="noopener">wapol</a>
+          <span class="chip steady">Steady</span>
+        </td>
+        <td class="num gain">+$23k</td>
+        <td class="num gain">+$488k</td>
+        <td class="num gain">+$33k</td>
+        <td class="num loss">&minus;$41k</td>
+        <td class="num">46%</td>
+        <td class="num">72</td>
+        <td class="num">$35k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="30.0" x2="132" y2="30.0" class="sp-zero"/><polyline points="0.0,30.0 0.9,30.0 1.8,30.0 2.7,30.0 3.6,30.0 4.5,30.0 5.4,30.0 6.2,30.0 7.1,30.0 8.0,30.0 8.9,30.0 9.8,30.0 10.7,30.0 11.6,30.0 12.5,30.0 13.4,30.0 14.3,30.0 15.2,30.0 16.1,30.0 16.9,30.0 17.8,30.0 18.7,30.0 19.6,30.0 20.5,30.0 21.4,30.0 22.3,30.0 23.2,30.0 24.1,30.0 25.0,30.0 25.9,30.0 26.8,30.0 27.6,30.0 28.5,30.0 29.4,30.0 30.3,30.0 31.2,30.0 32.1,30.0 33.0,30.0 33.9,30.0 34.8,29.8 35.7,29.9 36.6,29.8 37.5,29.6 38.4,29.5 39.2,29.3 40.1,29.3 41.0,29.2 41.9,29.3 42.8,29.1 43.7,29.3 44.6,29.3 45.5,29.3 46.4,29.3 47.3,29.3 48.2,29.4 49.1,29.1 49.9,29.4 50.8,29.4 51.7,29.5 52.6,29.5 53.5,29.7 54.4,29.9 55.3,30.0 56.2,29.9 57.1,30.0 58.0,30.0 58.9,30.0 59.8,30.0 60.6,29.8 61.5,27.8 62.4,27.5 63.3,27.4 64.2,27.4 65.1,26.9 66.0,26.9 66.9,26.8 67.8,23.5 68.7,23.1 69.6,23.0 70.5,22.9 71.4,21.9 72.2,21.7 73.1,21.3 74.0,19.6 74.9,18.7 75.8,17.8 76.7,17.0 77.6,15.9 78.5,15.2 79.4,12.1 80.3,10.6 81.2,10.3 82.1,10.2 82.9,9.9 83.8,9.6 84.7,9.3 85.6,8.8 86.5,8.7 87.4,8.3 88.3,8.1 89.2,8.0 90.1,8.0 91.0,8.0 91.9,8.0 92.8,8.0 93.6,8.0 94.5,8.0 95.4,8.0 96.3,8.0 97.2,8.1 98.1,8.1 99.0,8.1 99.9,8.1 100.8,8.1 101.7,8.1 102.6,8.0 103.5,7.7 104.4,7.4 105.2,7.6 106.1,8.3 107.0,7.5 107.9,7.1 108.8,6.1 109.7,4.8 110.6,4.6 111.5,5.6 112.4,3.8 113.3,4.3 114.2,4.4 115.1,3.4 115.9,3.8 116.8,1.4 117.7,1.1 118.6,0.9 119.5,1.5 120.4,1.7 121.3,2.0 122.2,1.7 123.1,1.5 124.0,1.4 124.9,0.9 125.8,0.7 126.6,0.9 127.5,0.4 128.4,0.0 129.3,0.5 130.2,0.0 131.1,1.2 132.0,0.3"/><circle cx="132" cy="0.3" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">20</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x21f333307ac6d2e65ac82f014b3dd2b64cbc35e3" target="_blank" rel="noopener">hi774c</a>
+          <span class="chip hot">Hot streak</span>
+        </td>
+        <td class="num gain">+$22k</td>
+        <td class="num loss">&minus;$5k</td>
+        <td class="num gain">+$52k</td>
+        <td class="num loss">&minus;$327k</td>
+        <td class="num">50%</td>
+        <td class="num">55</td>
+        <td class="num">$35k</td>
+        <td class="sparkcell"><svg class="spark loss" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="8.2" x2="132" y2="8.2" class="sp-zero"/><polyline points="0.0,8.2 0.6,8.4 1.3,8.5 1.9,8.4 2.5,8.5 3.1,8.5 3.8,8.4 4.4,8.4 5.0,8.5 5.7,8.3 6.3,8.7 6.9,8.6 7.5,8.3 8.2,8.3 8.8,8.2 9.4,8.3 10.1,8.1 10.7,7.8 11.3,7.8 11.9,7.5 12.6,7.4 13.2,7.5 13.8,8.5 14.5,9.5 15.1,9.5 15.7,9.3 16.3,9.1 17.0,8.8 17.6,9.5 18.2,12.1 18.9,9.9 19.5,10.1 20.1,9.9 20.7,8.4 21.4,7.9 22.0,7.5 22.6,9.9 23.3,12.7 23.9,15.1 24.5,15.3 25.1,16.4 25.8,17.9 26.4,18.5 27.0,18.1 27.7,18.5 28.3,20.1 28.9,21.7 29.5,23.9 30.2,24.3 30.8,25.8 31.4,22.3 32.1,25.1 32.7,23.0 33.3,24.5 33.9,26.2 34.6,28.6 35.2,29.0 35.8,26.7 36.5,27.0 37.1,29.3 37.7,29.6 38.3,29.3 39.0,26.9 39.6,26.6 40.2,24.1 40.9,24.2 41.5,25.8 42.1,26.4 42.7,26.4 43.4,26.9 44.0,25.6 44.6,24.5 45.3,30.0 45.9,22.7 46.5,21.8 47.1,23.0 47.8,22.8 48.4,21.8 49.0,21.5 49.7,20.8 50.3,23.5 50.9,23.9 51.5,23.5 52.2,23.9 52.8,23.2 53.4,22.0 54.1,22.3 54.7,26.7 55.3,25.8 55.9,26.3 56.6,27.7 57.2,25.5 57.8,26.5 58.5,28.0 59.1,24.5 59.7,24.7 60.3,24.7 61.0,24.2 61.6,24.5 62.2,22.3 62.9,22.1 63.5,23.2 64.1,19.2 64.7,19.1 65.4,18.5 66.0,18.1 66.6,18.3 67.3,13.8 67.9,11.7 68.5,12.5 69.1,12.1 69.8,10.6 70.4,9.3 71.0,7.1 71.7,7.0 72.3,8.1 72.9,8.3 73.5,10.7 74.2,12.9 74.8,10.9 75.4,10.3 76.1,5.4 76.7,5.0 77.3,0.0 77.9,4.7 78.6,2.7 79.2,5.6 79.8,9.5 80.5,10.1 81.1,12.1 81.7,11.9 82.3,13.7 83.0,15.6 83.6,15.9 84.2,19.9 84.9,20.4 85.5,17.2 86.1,17.0 86.7,14.0 87.4,14.5 88.0,13.4 88.6,15.8 89.3,14.4 89.9,15.3 90.5,15.9 91.1,16.2 91.8,16.1 92.4,10.2 93.0,10.3 93.7,14.4 94.3,14.6 94.9,14.6 95.5,14.0 96.2,13.6 96.8,13.2 97.4,13.2 98.1,12.2 98.7,12.4 99.3,12.9 99.9,11.1 100.6,11.3 101.2,11.5 101.8,11.1 102.5,12.2 103.1,11.3 103.7,12.9 104.3,13.4 105.0,12.5 105.6,12.2 106.2,12.4 106.9,12.1 107.5,13.3 108.1,14.1 108.7,13.1 109.4,12.5 110.0,11.3 110.6,10.9 111.3,11.3 111.9,11.6 112.5,11.6 113.1,12.2 113.8,9.5 114.4,9.0 115.0,10.1 115.7,11.4 116.3,11.9 116.9,11.8 117.5,11.0 118.2,10.4 118.8,10.0 119.4,9.4 120.1,7.3 120.7,6.3 121.3,5.5 121.9,6.6 122.6,4.1 123.2,2.6 123.8,2.5 124.5,1.8 125.1,2.8 125.7,3.6 126.3,3.5 127.0,5.8 127.6,6.9 128.2,6.0 128.9,6.1 129.5,7.4 130.1,10.3 130.7,12.9 131.4,10.0 132.0,8.5"/><circle cx="132" cy="8.5" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">21</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x684baa57c338c2549aec0aa3f034f695d72a8409" target="_blank" rel="noopener">monkeymashingkeyboa&#8230;</a>
+          <span class="chip steady">Steady</span>
+        </td>
+        <td class="num gain">+$22k</td>
+        <td class="num gain">+$424k</td>
+        <td class="num gain">+$234k</td>
+        <td class="num loss">&minus;$257k</td>
+        <td class="num">60%</td>
+        <td class="num">11</td>
+        <td class="num">$94k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="25.1" x2="132" y2="25.1" class="sp-zero"/><polyline points="0.0,25.1 2.1,25.6 4.3,25.4 6.4,24.7 8.5,23.5 10.6,23.1 12.8,23.2 14.9,23.1 17.0,23.0 19.2,26.3 21.3,25.0 23.4,21.2 25.5,20.9 27.7,23.7 29.8,23.7 31.9,27.7 34.1,28.7 36.2,30.0 38.3,22.8 40.5,19.5 42.6,18.5 44.7,22.1 46.8,20.7 49.0,21.1 51.1,20.8 53.2,20.8 55.4,21.1 57.5,19.0 59.6,16.1 61.7,15.4 63.9,10.1 66.0,10.2 68.1,15.2 70.3,15.2 72.4,23.5 74.5,19.3 76.6,16.3 78.8,13.8 80.9,15.1 83.0,13.2 85.2,13.7 87.3,15.2 89.4,13.4 91.5,11.1 93.7,11.6 95.8,11.3 97.9,13.9 100.1,16.1 102.2,17.0 104.3,15.7 106.5,14.4 108.6,9.7 110.7,5.1 112.8,4.9 115.0,4.9 117.1,4.3 119.2,4.5 121.4,2.1 123.5,0.0 125.6,0.7 127.7,0.7 129.9,3.9 132.0,3.0"/><circle cx="132" cy="3.0" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">22</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x2a69660046d7acc4ab204d7cc5ba78b0776cd2f7" target="_blank" rel="noopener">UpTheBlues</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$21k</td>
+        <td class="num gain">+$799k</td>
+        <td class="num loss">&minus;$301k</td>
+        <td class="num loss">&minus;$658k</td>
+        <td class="num">48%</td>
+        <td class="num">432</td>
+        <td class="num">$142k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="25.9" x2="132" y2="25.9" class="sp-zero"/><polyline points="0.0,25.9 0.6,25.9 1.3,25.9 1.9,25.9 2.6,25.9 3.2,25.8 3.8,25.9 4.5,25.9 5.1,25.9 5.7,25.9 6.4,25.9 7.0,26.0 7.7,26.0 8.3,25.9 8.9,25.9 9.6,25.9 10.2,25.9 10.8,26.0 11.5,26.0 12.1,26.0 12.8,26.0 13.4,26.1 14.0,26.1 14.7,26.1 15.3,26.1 15.9,26.1 16.6,26.1 17.2,26.1 17.9,26.1 18.5,26.1 19.1,26.1 19.8,26.1 20.4,26.1 21.0,26.1 21.7,26.1 22.3,26.1 23.0,26.1 23.6,26.1 24.2,26.1 24.9,26.1 25.5,26.1 26.1,26.1 26.8,26.1 27.4,26.1 28.1,26.1 28.7,26.1 29.3,26.1 30.0,26.1 30.6,26.1 31.2,26.1 31.9,26.1 32.5,26.3 33.2,26.0 33.8,26.2 34.4,26.1 35.1,26.2 35.7,26.1 36.3,26.5 37.0,27.1 37.6,26.8 38.3,26.5 38.9,26.3 39.5,26.0 40.2,26.0 40.8,26.1 41.4,25.9 42.1,25.8 42.7,25.7 43.4,25.5 44.0,25.8 44.6,26.1 45.3,26.1 45.9,26.1 46.6,26.1 47.2,26.1 47.8,26.1 48.5,26.1 49.1,26.1 49.7,26.1 50.4,26.1 51.0,26.1 51.7,26.1 52.3,26.1 52.9,26.1 53.6,26.1 54.2,26.3 54.8,26.3 55.5,26.1 56.1,26.0 56.8,26.0 57.4,25.9 58.0,24.3 58.7,24.2 59.3,24.1 59.9,23.8 60.6,23.2 61.2,23.0 61.9,22.5 62.5,23.6 63.1,23.9 63.8,24.3 64.4,25.2 65.0,24.1 65.7,25.4 66.3,25.2 67.0,27.4 67.6,27.4 68.2,27.7 68.9,27.3 69.5,26.6 70.1,27.2 70.8,26.9 71.4,27.9 72.1,28.3 72.7,27.5 73.3,28.2 74.0,28.5 74.6,30.0 75.2,29.0 75.9,28.4 76.5,16.8 77.2,16.1 77.8,19.8 78.4,10.4 79.1,9.1 79.7,11.0 80.3,8.4 81.0,10.1 81.6,17.8 82.3,17.3 82.9,17.4 83.5,16.3 84.2,16.3 84.8,15.2 85.4,15.3 86.1,18.7 86.7,18.4 87.4,21.6 88.0,22.8 88.6,16.5 89.3,16.2 89.9,15.1 90.6,15.3 91.2,14.5 91.8,15.6 92.5,15.5 93.1,15.6 93.7,14.2 94.4,13.7 95.0,11.7 95.7,12.6 96.3,12.4 96.9,11.9 97.6,12.6 98.2,15.0 98.8,15.2 99.5,14.0 100.1,13.7 100.8,12.5 101.4,12.3 102.0,12.8 102.7,12.4 103.3,12.3 103.9,12.5 104.6,9.3 105.2,8.0 105.9,6.5 106.5,6.4 107.1,5.5 107.8,5.9 108.4,3.5 109.0,2.6 109.7,1.7 110.3,1.5 111.0,1.4 111.6,0.6 112.2,1.2 112.9,1.8 113.5,0.7 114.1,1.3 114.8,2.0 115.4,3.1 116.1,0.5 116.7,8.2 117.3,5.8 118.0,6.9 118.6,7.9 119.2,5.1 119.9,3.3 120.5,5.3 121.2,6.3 121.8,5.7 122.4,6.1 123.1,9.2 123.7,2.8 124.3,0.0 125.0,2.3 125.6,0.4 126.3,1.4 126.9,4.1 127.5,5.0 128.2,4.8 128.8,1.2 129.4,3.0 130.1,1.6 130.7,5.1 131.4,9.4 132.0,8.4"/><circle cx="132" cy="8.4" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">23</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0x6d3c5bd13984b2de47c3a88ddc455309aab3d294" target="_blank" rel="noopener">VeryLucky888</a>
+          <span class="chip proven">Proven</span>
+        </td>
+        <td class="num gain">+$21k</td>
+        <td class="num gain">+$707k</td>
+        <td class="num gain">+$84k</td>
+        <td class="num loss">&minus;$90k</td>
+        <td class="num">73%</td>
+        <td class="num">495</td>
+        <td class="num">$269k</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="29.9" x2="132" y2="29.9" class="sp-zero"/><polyline points="0.0,29.9 0.9,29.9 1.7,29.9 2.6,30.0 3.4,30.0 4.3,30.0 5.1,30.0 6.0,30.0 6.9,30.0 7.7,30.0 8.6,29.9 9.4,29.9 10.3,29.9 11.1,29.8 12.0,29.7 12.9,29.7 13.7,29.7 14.6,29.6 15.4,29.5 16.3,29.4 17.1,29.3 18.0,29.3 18.9,29.3 19.7,29.3 20.6,29.2 21.4,29.5 22.3,29.6 23.1,29.6 24.0,29.5 24.9,29.4 25.7,29.3 26.6,29.1 27.4,28.9 28.3,28.7 29.1,28.6 30.0,28.5 30.9,28.4 31.7,28.1 32.6,28.0 33.4,27.9 34.3,27.7 35.1,27.6 36.0,27.4 36.9,27.2 37.7,27.0 38.6,27.0 39.4,26.9 40.3,26.6 41.1,26.4 42.0,26.2 42.9,25.9 43.7,25.8 44.6,25.5 45.4,25.2 46.3,25.0 47.1,24.7 48.0,24.4 48.9,24.1 49.7,23.9 50.6,23.4 51.4,23.1 52.3,22.8 53.1,22.6 54.0,22.4 54.9,22.4 55.7,22.0 56.6,21.5 57.4,21.6 58.3,23.6 59.1,23.4 60.0,23.6 60.9,23.3 61.7,22.9 62.6,22.8 63.4,22.4 64.3,23.3 65.1,23.3 66.0,23.0 66.9,22.7 67.7,22.8 68.6,22.3 69.4,22.3 70.3,22.4 71.1,22.2 72.0,21.8 72.9,23.7 73.7,23.4 74.6,22.7 75.4,22.7 76.3,21.7 77.1,22.5 78.0,22.5 78.9,21.5 79.7,21.0 80.6,20.6 81.4,19.9 82.3,20.3 83.1,20.7 84.0,20.7 84.9,19.3 85.7,19.9 86.6,19.8 87.4,19.9 88.3,20.1 89.1,19.6 90.0,19.9 90.9,19.6 91.7,19.4 92.6,19.6 93.4,21.5 94.3,20.8 95.1,20.9 96.0,20.6 96.9,20.1 97.7,20.1 98.6,19.8 99.4,20.7 100.3,18.8 101.1,18.0 102.0,18.4 102.9,17.5 103.7,16.2 104.6,15.9 105.4,14.3 106.3,13.2 107.1,13.3 108.0,12.7 108.9,11.3 109.7,9.7 110.6,11.4 111.4,10.8 112.3,9.7 113.1,9.2 114.0,6.9 114.9,5.6 115.7,5.2 116.6,4.1 117.4,3.5 118.3,5.0 119.1,5.5 120.0,5.6 120.9,6.3 121.7,5.9 122.6,5.0 123.4,6.5 124.3,3.9 125.1,3.1 126.0,2.1 126.9,2.2 127.7,1.3 128.6,0.0 129.4,2.5 130.3,2.2 131.1,3.5 132.0,2.2"/><circle cx="132" cy="2.2" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">24</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0xf5f92940519a72da460b1c2a606bc1230f0e87b0" target="_blank" rel="noopener">kekasaur</a>
+          <span class="chip hot">Hot streak</span>
+        </td>
+        <td class="num gain">+$20k</td>
+        <td class="num loss">&minus;$77k</td>
+        <td class="num gain">+$654k</td>
+        <td class="num loss">&minus;$808k</td>
+        <td class="num">32%</td>
+        <td class="num">0</td>
+        <td class="num">$0</td>
+        <td class="sparkcell"><svg class="spark loss" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="2.5" x2="132" y2="2.5" class="sp-zero"/><polyline points="0.0,2.8 0.7,7.5 1.4,7.5 2.1,7.5 2.8,7.5 3.4,7.7 4.1,12.7 4.8,12.7 5.5,12.5 6.2,20.3 6.9,19.4 7.6,19.4 8.2,24.7 8.9,23.6 9.6,23.3 10.3,23.3 11.0,23.3 11.7,23.3 12.4,22.8 13.1,23.1 13.8,21.4 14.4,21.7 15.1,21.7 15.8,20.5 16.5,20.5 17.2,20.5 17.9,20.5 18.6,20.5 19.2,18.9 19.9,21.4 20.6,21.4 21.3,19.4 22.0,19.4 22.7,19.2 23.4,23.5 24.1,22.1 24.8,23.8 25.4,24.7 26.1,25.4 26.8,25.3 27.5,22.8 28.2,14.1 28.9,13.9 29.6,13.8 30.2,10.4 30.9,10.6 31.6,9.6 32.3,6.8 33.0,12.3 33.7,13.0 34.4,12.2 35.1,13.4 35.8,13.8 36.4,11.2 37.1,16.1 37.8,18.2 38.5,18.2 39.2,18.5 39.9,18.5 40.6,18.5 41.2,18.5 41.9,20.8 42.6,23.2 43.3,24.2 44.0,25.0 44.7,26.2 45.4,22.0 46.1,21.2 46.8,23.5 47.4,24.0 48.1,24.0 48.8,24.0 49.5,24.1 50.2,24.3 50.9,21.3 51.6,21.7 52.2,23.4 52.9,23.4 53.6,23.4 54.3,23.4 55.0,23.4 55.7,23.6 56.4,25.3 57.1,25.0 57.8,24.9 58.4,23.4 59.1,23.4 59.8,24.9 60.5,23.3 61.2,23.6 61.9,26.7 62.6,28.9 63.2,28.6 63.9,27.0 64.6,27.0 65.3,27.0 66.0,28.7 66.7,28.7 67.4,28.7 68.1,28.6 68.8,28.6 69.4,29.5 70.1,29.7 70.8,29.7 71.5,29.7 72.2,29.7 72.9,29.7 73.6,29.7 74.2,29.7 74.9,29.7 75.6,29.7 76.3,29.7 77.0,29.7 77.7,29.7 78.4,29.7 79.1,29.7 79.8,29.7 80.4,29.7 81.1,29.9 81.8,30.0 82.5,30.0 83.2,30.0 83.9,30.0 84.6,30.0 85.2,30.0 85.9,30.0 86.6,30.0 87.3,30.0 88.0,30.0 88.7,30.0 89.4,30.0 90.1,30.0 90.8,29.4 91.4,29.3 92.1,29.3 92.8,29.3 93.5,29.4 94.2,29.1 94.9,28.9 95.6,28.9 96.2,28.9 96.9,28.9 97.6,29.0 98.3,24.3 99.0,24.3 99.7,24.3 100.4,24.3 101.1,24.3 101.8,24.3 102.4,24.2 103.1,24.2 103.8,24.2 104.5,24.2 105.2,27.2 105.9,26.5 106.6,26.2 107.2,26.2 107.9,26.7 108.6,26.3 109.3,27.2 110.0,27.1 110.7,27.1 111.4,27.1 112.1,27.1 112.8,27.1 113.4,27.1 114.1,27.1 114.8,23.9 115.5,23.4 116.2,23.7 116.9,22.2 117.6,17.1 118.2,17.1 118.9,17.0 119.6,0.5 120.3,0.0 121.0,0.8 121.7,0.6 122.4,5.7 123.1,7.3 123.8,10.5 124.4,10.2 125.1,4.7 125.8,5.2 126.5,5.2 127.2,2.8 127.9,2.8 128.6,2.6 129.2,3.5 129.9,3.5 130.6,3.5 131.3,4.8 132.0,5.1"/><circle cx="132" cy="5.1" r="2.4" class="sp-end"/></svg></td>
+      </tr>
+      <tr>
+        <td class="rank">25</td>
+        <td class="who">
+          <a href="https://polymarket.com/profile/0xf6dd2e6947283b30a19a106401dadad2bc9bac58" target="_blank" rel="noopener">Katalunygeaxvhj</a>
+          <span class="chip steady">Steady</span>
+        </td>
+        <td class="num gain">+$18k</td>
+        <td class="num gain">+$17k</td>
+        <td class="num flat">&mdash;</td>
+        <td class="num loss">&minus;$38k</td>
+        <td class="num">19%</td>
+        <td class="num">0</td>
+        <td class="num">$0</td>
+        <td class="sparkcell"><svg class="spark gain" viewBox="0 0 132 30" width="132" height="30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="9.4" x2="132" y2="9.4" class="sp-zero"/><polyline points="0.0,11.8 6.3,9.6 12.6,10.5 18.9,10.5 25.1,10.6 31.4,10.6 37.7,10.6 44.0,10.6 50.3,12.9 56.6,15.0 62.9,21.0 69.1,21.0 75.4,21.5 81.7,21.5 88.0,21.5 94.3,22.3 100.6,25.0 106.9,28.7 113.1,30.0 119.4,26.5 125.7,11.4 132.0,0.0"/><circle cx="132" cy="0.0" r="2.4" class="sp-end"/></svg></td>
+      </tr></tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>What they are holding now</h2>
+  <p class="sub">Open positions only &mdash; entry price against the current
+    market, for the eight wallets carrying the most live sports risk.</p>
+  <div class="cards">
+      <article class="card">
+        <header class="card-hd">
+          <div>
+            <h3><a href="https://polymarket.com/profile/0xf0318c32136c2db7fec88b84869aee6a1106c80c" target="_blank" rel="noopener">BreakTheBank</a></h3>
+            <p class="wallet">0xf0318c32136c2db7fec88b84869aee6a1106c80c</p>
+          </div>
+          <svg class="spark gain" viewBox="0 0 168 40" width="168" height="40" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="35.7" x2="168" y2="35.7" class="sp-zero"/><polyline points="0.0,35.7 0.7,35.2 1.5,33.9 2.2,33.6 2.9,34.2 3.6,35.2 4.4,35.6 5.1,36.6 5.8,36.6 6.5,36.6 7.3,36.6 8.0,36.6 8.7,36.6 9.5,36.8 10.2,35.8 10.9,36.0 11.6,36.0 12.4,35.9 13.1,35.9 13.8,35.9 14.5,35.9 15.3,35.9 16.0,37.3 16.7,37.3 17.5,37.3 18.2,37.3 18.9,37.3 19.6,37.3 20.4,37.3 21.1,37.3 21.8,37.3 22.5,37.3 23.3,37.3 24.0,37.3 24.7,37.3 25.5,37.3 26.2,37.3 26.9,37.3 27.6,37.3 28.4,37.3 29.1,37.3 29.8,37.3 30.5,37.3 31.3,37.3 32.0,37.3 32.7,37.3 33.5,37.3 34.2,37.3 34.9,37.3 35.6,37.3 36.4,37.3 37.1,37.3 37.8,37.3 38.5,37.3 39.3,37.3 40.0,37.3 40.7,37.3 41.5,37.3 42.2,37.3 42.9,37.3 43.6,37.3 44.4,37.3 45.1,37.3 45.8,37.3 46.5,37.3 47.3,37.3 48.0,37.3 48.7,37.3 49.5,37.3 50.2,37.3 50.9,37.3 51.6,37.3 52.4,37.3 53.1,37.3 53.8,37.3 54.5,37.3 55.3,37.3 56.0,37.3 56.7,37.3 57.5,37.3 58.2,37.3 58.9,37.3 59.6,37.3 60.4,37.3 61.1,37.3 61.8,37.3 62.5,37.3 63.3,37.3 64.0,37.3 64.7,37.3 65.5,37.3 66.2,37.3 66.9,37.3 67.6,37.3 68.4,37.3 69.1,37.3 69.8,37.3 70.5,37.3 71.3,37.3 72.0,37.3 72.7,37.3 73.5,37.3 74.2,37.3 74.9,37.3 75.6,37.3 76.4,37.3 77.1,37.3 77.8,37.3 78.5,37.3 79.3,37.3 80.0,37.3 80.7,37.3 81.5,37.1 82.2,36.9 82.9,37.3 83.6,37.8 84.4,38.1 85.1,38.7 85.8,38.9 86.5,40.0 87.3,40.0 88.0,40.0 88.7,40.0 89.5,40.0 90.2,40.0 90.9,40.0 91.6,40.0 92.4,40.0 93.1,40.0 93.8,40.0 94.5,40.0 95.3,40.0 96.0,40.0 96.7,40.0 97.5,40.0 98.2,40.0 98.9,40.0 99.6,40.0 100.4,40.0 101.1,40.0 101.8,39.5 102.5,35.5 103.3,38.7 104.0,36.0 104.7,29.5 105.5,30.6 106.2,20.0 106.9,21.7 107.6,30.4 108.4,33.9 109.1,27.4 109.8,19.6 110.5,15.9 111.3,17.1 112.0,21.8 112.7,22.0 113.5,21.1 114.2,20.7 114.9,15.5 115.6,14.2 116.4,13.9 117.1,17.9 117.8,26.4 118.5,24.7 119.3,27.0 120.0,22.4 120.7,19.9 121.5,19.8 122.2,18.9 122.9,23.4 123.6,25.2 124.4,22.2 125.1,22.0 125.8,17.3 126.5,20.0 127.3,19.6 128.0,18.1 128.7,11.1 129.5,2.0 130.2,2.0 130.9,3.1 131.6,3.1 132.4,3.1 133.1,3.1 133.8,3.0 134.5,3.0 135.3,3.0 136.0,3.0 136.7,3.1 137.5,3.1 138.2,2.6 138.9,2.6 139.6,2.6 140.4,2.6 141.1,2.6 141.8,2.6 142.5,0.2 143.3,1.0 144.0,0.8 144.7,0.1 145.5,0.1 146.2,0.0 146.9,3.1 147.6,3.3 148.4,3.3 149.1,2.5 149.8,13.1 150.5,13.0 151.3,13.0 152.0,14.0 152.7,15.2 153.5,14.2 154.2,16.4 154.9,15.2 155.6,18.4 156.4,18.5 157.1,20.7 157.8,20.8 158.5,21.4 159.3,18.8 160.0,23.0 160.7,22.9 161.5,22.9 162.2,22.9 162.9,23.0 163.6,22.6 164.4,22.6 165.1,22.1 165.8,21.8 166.5,20.3 167.3,22.6 168.0,22.0"/><circle cx="168" cy="22.0" r="2.4" class="sp-end"/></svg>
+        </header>
+        <div class="stats">
+          <div><span>P&amp;L since 2026-07-23</span>
+               <b class="gain">+$2.83M</b></div>
+          <div><span>Last 30 days</span>
+               <b class="loss">&minus;$4.53M</b></div>
+          <div><span>Deepest drawdown</span>
+               <b class="loss">&minus;$4.73M</b></div>
+          <div><span>Live sports risk</span><b>$724k</b></div>
+        </div>
+        <div class="lgs"><span class="lgbar"><b>Soccer</b> $665k</span><span class="lgbar"><b>NBA</b> $47k</span><span class="lgbar"><b>NFL</b> $13k</span></div>
+        <div class="tbl-wrap">
+          <table class="pos">
+            <thead><tr><th>Market</th><th>Their pick</th><th>Entry</th>
+              <th>Now</th><th>Value</th><th>Unrealised</th></tr></thead>
+            <tbody>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Manchester City win the 2026-27 English Premier League (EPL) Championship</td>
+            <td class="pick">No</td>
+            <td class="num">0.710</td>
+            <td class="num">0.735</td>
+            <td class="num">$337k</td>
+            <td class="num gain">+$11k</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Arsenal win the 2026-27 English Premier League (EPL) Championship?</td>
+            <td class="pick">Yes</td>
+            <td class="num">0.042</td>
+            <td class="num">0.535</td>
+            <td class="num">$214k</td>
+            <td class="num gain">+$197k</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">NBA</span>
+              Will Philadelphia 76ers win the 2027 NBA Finals?</td>
+            <td class="pick">No</td>
+            <td class="num">0.866</td>
+            <td class="num">0.894</td>
+            <td class="num">$47k</td>
+            <td class="num gain">+$1k</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Chelsea win the 2026-27 English Premier League (EPL) Championship?</td>
+            <td class="pick">Yes</td>
+            <td class="num">0.044</td>
+            <td class="num">0.095</td>
+            <td class="num">$32k</td>
+            <td class="num gain">+$17k</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Liverpool win the 2026-27 English Premier League (EPL) Championship?</td>
+            <td class="pick">Yes</td>
+            <td class="num">0.042</td>
+            <td class="num">0.055</td>
+            <td class="num">$22k</td>
+            <td class="num gain">+$5k</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Harry Kane win the 2026 Ballon d&#x27;Or?</td>
+            <td class="pick">No</td>
+            <td class="num">0.464</td>
+            <td class="num">0.379</td>
+            <td class="num">$18k</td>
+            <td class="num loss">&minus;$4k</td>
+          </tr></tbody>
+          </table>
+        </div>
+        <p class="more">+24 further live positions not shown</p>
+      </article>
+      <article class="card">
+        <header class="card-hd">
+          <div>
+            <h3><a href="https://polymarket.com/profile/0xdc41c39b95453c943174f369926018f6963bdd7e" target="_blank" rel="noopener">nigiri99</a></h3>
+            <p class="wallet">0xdc41c39b95453c943174f369926018f6963bdd7e</p>
+          </div>
+          <svg class="spark gain" viewBox="0 0 168 40" width="168" height="40" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="11.1" x2="168" y2="11.1" class="sp-zero"/><polyline points="0.0,10.4 1.0,19.9 2.0,17.3 3.1,17.7 4.1,17.7 5.1,17.7 6.1,17.8 7.2,17.8 8.2,17.8 9.2,17.8 10.2,17.8 11.3,17.8 12.3,17.8 13.3,17.8 14.3,17.8 15.4,17.8 16.4,17.8 17.4,17.8 18.4,17.8 19.5,17.8 20.5,17.8 21.5,17.8 22.5,17.8 23.6,17.8 24.6,17.8 25.6,17.8 26.6,17.8 27.7,17.8 28.7,17.8 29.7,17.8 30.7,17.8 31.8,17.8 32.8,17.8 33.8,17.8 34.8,17.8 35.9,17.8 36.9,17.8 37.9,17.8 38.9,17.8 40.0,17.8 41.0,17.8 42.0,17.8 43.0,17.8 44.0,17.8 45.1,17.8 46.1,17.8 47.1,17.8 48.1,17.8 49.2,17.8 50.2,17.8 51.2,17.8 52.2,17.8 53.3,17.8 54.3,17.8 55.3,17.8 56.3,17.8 57.4,17.8 58.4,17.8 59.4,17.8 60.4,17.8 61.5,17.8 62.5,17.8 63.5,17.8 64.5,17.8 65.6,17.8 66.6,17.8 67.6,17.8 68.6,17.8 69.7,17.8 70.7,17.8 71.7,17.8 72.7,17.8 73.8,17.8 74.8,17.8 75.8,17.8 76.8,17.8 77.9,17.8 78.9,17.8 79.9,17.8 80.9,17.8 82.0,17.8 83.0,17.8 84.0,17.8 85.0,17.8 86.0,17.8 87.1,17.8 88.1,17.8 89.1,17.8 90.1,17.8 91.2,17.8 92.2,17.8 93.2,17.8 94.2,17.8 95.3,17.8 96.3,17.8 97.3,17.8 98.3,17.8 99.4,17.8 100.4,17.8 101.4,17.8 102.4,17.8 103.5,17.2 104.5,17.3 105.5,17.4 106.5,17.3 107.6,17.3 108.6,22.9 109.6,21.0 110.6,21.1 111.7,21.2 112.7,21.1 113.7,28.7 114.7,28.8 115.8,28.8 116.8,28.6 117.8,28.5 118.8,28.6 119.9,29.9 120.9,28.8 121.9,33.1 122.9,32.7 124.0,34.6 125.0,34.5 126.0,34.5 127.0,35.1 128.0,37.8 129.1,35.5 130.1,37.5 131.1,39.7 132.1,40.0 133.2,36.1 134.2,31.3 135.2,33.4 136.2,27.5 137.3,26.8 138.3,31.0 139.3,31.5 140.3,36.0 141.4,36.7 142.4,36.8 143.4,38.4 144.4,37.2 145.5,35.2 146.5,34.0 147.5,33.1 148.5,28.0 149.6,27.4 150.6,24.5 151.6,26.3 152.6,23.1 153.7,18.8 154.7,16.4 155.7,7.0 156.7,3.0 157.8,2.7 158.8,4.8 159.8,8.7 160.8,10.7 161.9,13.1 162.9,13.8 163.9,8.3 164.9,9.6 166.0,12.3 167.0,1.2 168.0,0.0"/><circle cx="168" cy="0.0" r="2.4" class="sp-end"/></svg>
+        </header>
+        <div class="stats">
+          <div><span>P&amp;L since 2026-07-23</span>
+               <b class="gain">+$378k</b></div>
+          <div><span>Last 30 days</span>
+               <b class="gain">+$909k</b></div>
+          <div><span>Deepest drawdown</span>
+               <b class="loss">&minus;$1.01M</b></div>
+          <div><span>Live sports risk</span><b>$338k</b></div>
+        </div>
+        <div class="lgs"><span class="lgbar"><b>Soccer</b> $185k</span><span class="lgbar"><b>Tennis</b> $85k</span><span class="lgbar"><b>MLB</b> $32k</span><span class="lgbar"><b>NFL</b> $19k</span><span class="lgbar"><b>Other sport</b> $5k</span></div>
+        <div class="tbl-wrap">
+          <table class="pos">
+            <thead><tr><th>Market</th><th>Their pick</th><th>Entry</th>
+              <th>Now</th><th>Value</th><th>Unrealised</th></tr></thead>
+            <tbody>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will FC Bayern M&#252;nchen win on 2026-09-10?</td>
+            <td class="pick">Yes</td>
+            <td class="num">0.898</td>
+            <td class="num">0.905</td>
+            <td class="num">$77k</td>
+            <td class="num gain">+$566</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will AS Roma win on 2026-09-10?</td>
+            <td class="pick">Yes</td>
+            <td class="num">0.453</td>
+            <td class="num">0.465</td>
+            <td class="num">$29k</td>
+            <td class="num gain">+$775</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Tennis</span>
+              Will Ben Shelton win the 2026 Men&#x27;s US Open?</td>
+            <td class="pick">Yes</td>
+            <td class="num">0.148</td>
+            <td class="num">0.363</td>
+            <td class="num">$20k</td>
+            <td class="num gain">+$12k</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Tennis</span>
+              Will Aryna Sabalenka win the 2026 Women&#8217;s US Open?</td>
+            <td class="pick">Yes</td>
+            <td class="num">0.364</td>
+            <td class="num">0.365</td>
+            <td class="num">$11k</td>
+            <td class="num gain">+$34</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Fenerbah&#231;e SK vs. AS Roma: Both Teams to Score</td>
+            <td class="pick">Yes</td>
+            <td class="num">0.617</td>
+            <td class="num">0.635</td>
+            <td class="num">$10k</td>
+            <td class="num gain">+$296</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Tennis</span>
+              Will Ben Shelton win the 2026 Men&#x27;s US Open?</td>
+            <td class="pick">No</td>
+            <td class="num">0.716</td>
+            <td class="num">0.636</td>
+            <td class="num">$10k</td>
+            <td class="num loss">&minus;$1k</td>
+          </tr></tbody>
+          </table>
+        </div>
+        <p class="more">+469 further live positions not shown</p>
+      </article>
+      <article class="card">
+        <header class="card-hd">
+          <div>
+            <h3><a href="https://polymarket.com/profile/0x821dab0565ebf5b327f51db06223fdcfe01acf16" target="_blank" rel="noopener">Flaznorp</a></h3>
+            <p class="wallet">0x821dab0565ebf5b327f51db06223fdcfe01acf16</p>
+          </div>
+          <svg class="spark gain" viewBox="0 0 168 40" width="168" height="40" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,40.0 11.2,39.8 22.4,39.4 33.6,36.9 44.8,33.3 56.0,29.7 67.2,28.5 78.4,24.8 89.6,26.5 100.8,23.0 112.0,15.6 123.2,5.5 134.4,0.0 145.6,8.0 156.8,11.4 168.0,8.1"/><circle cx="168" cy="8.1" r="2.4" class="sp-end"/></svg>
+        </header>
+        <div class="stats">
+          <div><span>P&amp;L since 2026-07-23</span>
+               <b class="gain">+$888k</b></div>
+          <div><span>Last 30 days</span>
+               <b class="flat">&mdash;</b></div>
+          <div><span>Deepest drawdown</span>
+               <b class="loss">&minus;$293k</b></div>
+          <div><span>Live sports risk</span><b>$314k</b></div>
+        </div>
+        <div class="lgs"><span class="lgbar"><b>Soccer</b> $293k</span><span class="lgbar"><b>Tennis</b> $19k</span><span class="lgbar"><b>NFL</b> $714</span><span class="lgbar"><b>Esports</b> $660</span><span class="lgbar"><b>Other sport</b> $551</span></div>
+        <div class="tbl-wrap">
+          <table class="pos">
+            <thead><tr><th>Market</th><th>Their pick</th><th>Entry</th>
+              <th>Now</th><th>Value</th><th>Unrealised</th></tr></thead>
+            <tbody>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Brighton &amp; Hove Albion FC win on 2026-09-13?</td>
+            <td class="pick">No</td>
+            <td class="num">0.480</td>
+            <td class="num">0.475</td>
+            <td class="num">$24k</td>
+            <td class="num loss">&minus;$253</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Como 1907 win on 2026-09-10?</td>
+            <td class="pick">No</td>
+            <td class="num">0.444</td>
+            <td class="num">0.455</td>
+            <td class="num">$16k</td>
+            <td class="num gain">+$403</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              FC Bayern M&#252;nchen vs. FK Bod&#248;/Glimt: O/U 5.5</td>
+            <td class="pick">Under</td>
+            <td class="num">0.640</td>
+            <td class="num">0.625</td>
+            <td class="num">$16k</td>
+            <td class="num loss">&minus;$379</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Tennis</span>
+              Antalya 4: Ane Mintegi Del Olmo vs Alicia Herrero Linana</td>
+            <td class="pick">Alicia Herrero Linana</td>
+            <td class="num">0.970</td>
+            <td class="num">0.965</td>
+            <td class="num">$11k</td>
+            <td class="num loss">&minus;$58</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              FC Bayern M&#252;nchen vs. FK Bod&#248;/Glimt: Both Teams to Score</td>
+            <td class="pick">No</td>
+            <td class="num">0.423</td>
+            <td class="num">0.425</td>
+            <td class="num">$6k</td>
+            <td class="num gain">+$31</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Exact Score: CD Coquimbo Unido 0 - 3 CD Huachipato?</td>
+            <td class="pick">No</td>
+            <td class="num">0.978</td>
+            <td class="num">0.500</td>
+            <td class="num">$6k</td>
+            <td class="num loss">&minus;$5k</td>
+          </tr></tbody>
+          </table>
+        </div>
+        <p class="more">+487 further live positions not shown</p>
+      </article>
+      <article class="card">
+        <header class="card-hd">
+          <div>
+            <h3><a href="https://polymarket.com/profile/0x31e5d54aded22aa7cd80dbe9e33102abe2504879" target="_blank" rel="noopener">Noprajsk</a></h3>
+            <p class="wallet">0x31e5d54aded22aa7cd80dbe9e33102abe2504879</p>
+          </div>
+          <svg class="spark gain" viewBox="0 0 168 40" width="168" height="40" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,40.0 56.0,12.6 112.0,0.0 168.0,4.2"/><circle cx="168" cy="4.2" r="2.4" class="sp-end"/></svg>
+        </header>
+        <div class="stats">
+          <div><span>P&amp;L since 2026-07-23</span>
+               <b class="gain">+$991k</b></div>
+          <div><span>Last 30 days</span>
+               <b class="flat">&mdash;</b></div>
+          <div><span>Deepest drawdown</span>
+               <b class="loss">&minus;$114k</b></div>
+          <div><span>Live sports risk</span><b>$273k</b></div>
+        </div>
+        <div class="lgs"><span class="lgbar"><b>Esports</b> $273k</span></div>
+        <div class="tbl-wrap">
+          <table class="pos">
+            <thead><tr><th>Market</th><th>Their pick</th><th>Entry</th>
+              <th>Now</th><th>Value</th><th>Unrealised</th></tr></thead>
+            <tbody>
+          <tr>
+            <td class="mkt"><span class="lg">Esports</span>
+              Counter-Strike: Alliance vs magic (BO3) - FISSURE PLAYGROUND Group B</td>
+            <td class="pick">magic</td>
+            <td class="num">0.391</td>
+            <td class="num">0.155</td>
+            <td class="num">$273k</td>
+            <td class="num loss">&minus;$416k</td>
+          </tr></tbody>
+          </table>
+        </div>
+        
+      </article>
+      <article class="card">
+        <header class="card-hd">
+          <div>
+            <h3><a href="https://polymarket.com/profile/0x6d3c5bd13984b2de47c3a88ddc455309aab3d294" target="_blank" rel="noopener">VeryLucky888</a></h3>
+            <p class="wallet">0x6d3c5bd13984b2de47c3a88ddc455309aab3d294</p>
+          </div>
+          <svg class="spark gain" viewBox="0 0 168 40" width="168" height="40" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="39.9" x2="168" y2="39.9" class="sp-zero"/><polyline points="0.0,39.9 1.1,39.8 2.2,39.9 3.3,40.0 4.4,40.0 5.5,40.0 6.5,40.0 7.6,40.0 8.7,40.0 9.8,39.9 10.9,39.9 12.0,39.9 13.1,39.8 14.2,39.8 15.3,39.6 16.4,39.6 17.5,39.5 18.5,39.4 19.6,39.3 20.7,39.3 21.8,39.1 22.9,39.1 24.0,39.1 25.1,39.0 26.2,38.9 27.3,39.4 28.4,39.4 29.5,39.4 30.5,39.3 31.6,39.2 32.7,39.0 33.8,38.8 34.9,38.6 36.0,38.3 37.1,38.1 38.2,38.0 39.3,37.8 40.4,37.5 41.5,37.3 42.5,37.1 43.6,37.0 44.7,36.8 45.8,36.5 46.9,36.2 48.0,36.0 49.1,36.0 50.2,35.9 51.3,35.5 52.4,35.1 53.5,34.9 54.5,34.5 55.6,34.4 56.7,34.0 57.8,33.5 58.9,33.4 60.0,32.9 61.1,32.5 62.2,32.1 63.3,31.8 64.4,31.2 65.5,30.8 66.5,30.4 67.6,30.1 68.7,29.9 69.8,29.8 70.9,29.3 72.0,28.7 73.1,28.8 74.2,31.5 75.3,31.2 76.4,31.5 77.5,31.0 78.5,30.6 79.6,30.4 80.7,29.9 81.8,31.0 82.9,31.1 84.0,30.7 85.1,30.3 86.2,30.4 87.3,29.7 88.4,29.7 89.5,29.9 90.5,29.6 91.6,29.0 92.7,31.6 93.8,31.2 94.9,30.2 96.0,30.2 97.1,29.0 98.2,30.0 99.3,30.0 100.4,28.7 101.5,28.1 102.5,27.5 103.6,26.6 104.7,27.1 105.8,27.5 106.9,27.6 108.0,25.7 109.1,26.5 110.2,26.4 111.3,26.5 112.4,26.8 113.5,26.2 114.5,26.5 115.6,26.2 116.7,25.9 117.8,26.1 118.9,28.7 120.0,27.7 121.1,27.9 122.2,27.4 123.3,26.8 124.4,26.8 125.5,26.5 126.5,27.6 127.6,25.1 128.7,23.9 129.8,24.5 130.9,23.3 132.0,21.5 133.1,21.3 134.2,19.1 135.3,17.6 136.4,17.8 137.5,17.0 138.5,15.1 139.6,13.0 140.7,15.2 141.8,14.4 142.9,12.9 144.0,12.3 145.1,9.2 146.2,7.5 147.3,6.9 148.4,5.5 149.5,4.6 150.5,6.7 151.6,7.4 152.7,7.5 153.8,8.4 154.9,7.9 156.0,6.6 157.1,8.7 158.2,5.2 159.3,4.1 160.4,2.8 161.5,2.9 162.5,1.7 163.6,0.0 164.7,3.3 165.8,3.0 166.9,4.7 168.0,3.0"/><circle cx="168" cy="3.0" r="2.4" class="sp-end"/></svg>
+        </header>
+        <div class="stats">
+          <div><span>P&amp;L since 2026-07-23</span>
+               <b class="gain">+$707k</b></div>
+          <div><span>Last 30 days</span>
+               <b class="gain">+$84k</b></div>
+          <div><span>Deepest drawdown</span>
+               <b class="loss">&minus;$90k</b></div>
+          <div><span>Live sports risk</span><b>$269k</b></div>
+        </div>
+        <div class="lgs"><span class="lgbar"><b>Soccer</b> $163k</span><span class="lgbar"><b>NFL</b> $33k</span><span class="lgbar"><b>UFC/MMA</b> $21k</span><span class="lgbar"><b>College FB</b> $19k</span><span class="lgbar"><b>Other sport</b> $13k</span></div>
+        <div class="tbl-wrap">
+          <table class="pos">
+            <thead><tr><th>Market</th><th>Their pick</th><th>Entry</th>
+              <th>Now</th><th>Value</th><th>Unrealised</th></tr></thead>
+            <tbody>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Como 1907 win on 2026-09-10?</td>
+            <td class="pick">No</td>
+            <td class="num">0.449</td>
+            <td class="num">0.455</td>
+            <td class="num">$14k</td>
+            <td class="num gain">+$182</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Hull City AFC win on 2026-09-12?</td>
+            <td class="pick">No</td>
+            <td class="num">0.928</td>
+            <td class="num">0.935</td>
+            <td class="num">$9k</td>
+            <td class="num gain">+$66</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will PSV win on 2026-09-10?</td>
+            <td class="pick">No</td>
+            <td class="num">0.340</td>
+            <td class="num">0.345</td>
+            <td class="num">$8k</td>
+            <td class="num gain">+$120</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">UFC/MMA</span>
+              Noche UFC: Muslim Salikhov vs. Ignacio Bahamondes (Welterweight, Prelims)</td>
+            <td class="pick">Ignacio Bahamondes</td>
+            <td class="num">0.806</td>
+            <td class="num">0.815</td>
+            <td class="num">$7k</td>
+            <td class="num gain">+$86</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Sabah FK win on 2026-09-10?</td>
+            <td class="pick">No</td>
+            <td class="num">0.960</td>
+            <td class="num">0.972</td>
+            <td class="num">$6k</td>
+            <td class="num gain">+$73</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will FC Cincinnati win on 2026-09-05?</td>
+            <td class="pick">No</td>
+            <td class="num">0.402</td>
+            <td class="num">0.675</td>
+            <td class="num">$6k</td>
+            <td class="num gain">+$2k</td>
+          </tr></tbody>
+          </table>
+        </div>
+        <p class="more">+489 further live positions not shown</p>
+      </article>
+      <article class="card">
+        <header class="card-hd">
+          <div>
+            <h3><a href="https://polymarket.com/profile/0x924379a79c64b77ad5816ad362122a5f6228658e" target="_blank" rel="noopener">Kch-Temp</a></h3>
+            <p class="wallet">0x924379a79c64b77ad5816ad362122a5f6228658e</p>
+          </div>
+          <svg class="spark gain" viewBox="0 0 168 40" width="168" height="40" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="19.2" x2="168" y2="19.2" class="sp-zero"/><polyline points="0.0,19.2 1.8,19.3 3.6,21.0 5.4,21.8 7.2,18.3 9.0,24.3 10.8,23.6 12.6,30.7 14.5,32.0 16.3,40.0 18.1,37.0 19.9,36.3 21.7,26.4 23.5,23.8 25.3,24.3 27.1,27.1 28.9,28.5 30.7,28.4 32.5,11.9 34.3,6.0 36.1,10.1 37.9,10.4 39.7,5.4 41.5,3.4 43.4,1.7 45.2,2.3 47.0,2.9 48.8,11.8 50.6,8.2 52.4,8.2 54.2,7.3 56.0,7.3 57.8,7.1 59.6,7.1 61.4,7.1 63.2,3.6 65.0,6.1 66.8,6.1 68.6,6.0 70.5,6.0 72.3,3.3 74.1,3.3 75.9,3.3 77.7,3.3 79.5,3.3 81.3,3.3 83.1,3.3 84.9,3.3 86.7,3.4 88.5,3.1 90.3,3.1 92.1,3.1 93.9,3.1 95.7,3.1 97.5,3.1 99.4,3.1 101.2,3.1 103.0,3.2 104.8,3.2 106.6,2.8 108.4,2.8 110.2,2.8 112.0,2.8 113.8,2.8 115.6,2.8 117.4,2.8 119.2,2.8 121.0,2.8 122.8,2.4 124.6,2.4 126.5,2.4 128.3,2.4 130.1,2.4 131.9,2.5 133.7,2.5 135.5,2.5 137.3,2.5 139.1,2.5 140.9,2.5 142.7,2.7 144.5,2.7 146.3,0.8 148.1,1.4 149.9,1.4 151.7,1.4 153.5,1.4 155.4,1.4 157.2,1.4 159.0,3.1 160.8,3.1 162.6,3.1 164.4,3.1 166.2,3.1 168.0,0.0"/><circle cx="168" cy="0.0" r="2.4" class="sp-end"/></svg>
+        </header>
+        <div class="stats">
+          <div><span>P&amp;L since 2026-07-23</span>
+               <b class="gain">+$980k</b></div>
+          <div><span>Last 30 days</span>
+               <b class="gain">+$141k</b></div>
+          <div><span>Deepest drawdown</span>
+               <b class="loss">&minus;$1.11M</b></div>
+          <div><span>Live sports risk</span><b>$157k</b></div>
+        </div>
+        <div class="lgs"><span class="lgbar"><b>NFL</b> $147k</span><span class="lgbar"><b>Tennis</b> $10k</span></div>
+        <div class="tbl-wrap">
+          <table class="pos">
+            <thead><tr><th>Market</th><th>Their pick</th><th>Entry</th>
+              <th>Now</th><th>Value</th><th>Unrealised</th></tr></thead>
+            <tbody>
+          <tr>
+            <td class="mkt"><span class="lg">NFL</span>
+              Spread: Rams (-3.5)</td>
+            <td class="pick">49ers</td>
+            <td class="num">0.490</td>
+            <td class="num">0.495</td>
+            <td class="num">$106k</td>
+            <td class="num gain">+$1k</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">NFL</span>
+              49ers vs. Rams</td>
+            <td class="pick">49ers</td>
+            <td class="num">0.350</td>
+            <td class="num">0.355</td>
+            <td class="num">$41k</td>
+            <td class="num gain">+$585</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Tennis</span>
+              US Open WTA: Coco Gauff vs Elena Rybakina</td>
+            <td class="pick">Coco Gauff</td>
+            <td class="num">0.480</td>
+            <td class="num">0.495</td>
+            <td class="num">$10k</td>
+            <td class="num gain">+$289</td>
+          </tr></tbody>
+          </table>
+        </div>
+        
+      </article>
+      <article class="card">
+        <header class="card-hd">
+          <div>
+            <h3><a href="https://polymarket.com/profile/0x2a69660046d7acc4ab204d7cc5ba78b0776cd2f7" target="_blank" rel="noopener">UpTheBlues</a></h3>
+            <p class="wallet">0x2a69660046d7acc4ab204d7cc5ba78b0776cd2f7</p>
+          </div>
+          <svg class="spark gain" viewBox="0 0 168 40" width="168" height="40" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="34.5" x2="168" y2="34.5" class="sp-zero"/><polyline points="0.0,34.5 0.8,34.5 1.6,34.5 2.4,34.5 3.2,34.5 4.1,34.5 4.9,34.5 5.7,34.5 6.5,34.5 7.3,34.5 8.1,34.6 8.9,34.6 9.7,34.6 10.6,34.5 11.4,34.5 12.2,34.5 13.0,34.6 13.8,34.6 14.6,34.7 15.4,34.7 16.2,34.7 17.0,34.8 17.9,34.8 18.7,34.8 19.5,34.8 20.3,34.8 21.1,34.8 21.9,34.8 22.7,34.8 23.5,34.8 24.3,34.8 25.2,34.8 26.0,34.8 26.8,34.8 27.6,34.9 28.4,34.8 29.2,34.8 30.0,34.8 30.8,34.8 31.7,34.8 32.5,34.8 33.3,34.8 34.1,34.8 34.9,34.8 35.7,34.8 36.5,34.8 37.3,34.8 38.1,34.8 39.0,34.8 39.8,34.8 40.6,34.8 41.4,35.0 42.2,34.6 43.0,34.9 43.8,34.9 44.6,35.0 45.4,34.8 46.3,35.4 47.1,36.2 47.9,35.7 48.7,35.4 49.5,35.1 50.3,34.7 51.1,34.7 51.9,34.8 52.8,34.5 53.6,34.4 54.4,34.2 55.2,34.0 56.0,34.4 56.8,34.7 57.6,34.8 58.4,34.9 59.2,34.9 60.1,34.9 60.9,34.9 61.7,34.9 62.5,34.9 63.3,34.9 64.1,34.9 64.9,34.9 65.7,34.9 66.6,34.9 67.4,34.9 68.2,34.9 69.0,35.0 69.8,35.1 70.6,34.8 71.4,34.7 72.2,34.6 73.0,34.5 73.9,32.4 74.7,32.2 75.5,32.2 76.3,31.8 77.1,30.9 77.9,30.6 78.7,30.0 79.5,31.5 80.3,31.9 81.2,32.5 82.0,33.6 82.8,32.2 83.6,33.8 84.4,33.6 85.2,36.5 86.0,36.5 86.8,36.9 87.7,36.4 88.5,35.5 89.3,36.3 90.1,35.9 90.9,37.2 91.7,37.7 92.5,36.7 93.3,37.6 94.1,38.1 95.0,40.0 95.8,38.7 96.6,37.9 97.4,22.4 98.2,21.5 99.0,26.4 99.8,13.8 100.6,12.2 101.4,14.7 102.3,11.2 103.1,13.4 103.9,23.7 104.7,23.1 105.5,23.2 106.3,21.7 107.1,21.7 107.9,20.3 108.8,20.3 109.6,24.9 110.4,24.5 111.2,28.8 112.0,30.4 112.8,22.0 113.6,21.6 114.4,20.2 115.2,20.4 116.1,19.3 116.9,20.8 117.7,20.7 118.5,20.8 119.3,19.0 120.1,18.3 120.9,15.6 121.7,16.7 122.6,16.5 123.4,15.8 124.2,16.8 125.0,19.9 125.8,20.2 126.6,18.6 127.4,18.2 128.2,16.7 129.0,16.5 129.9,17.0 130.7,16.5 131.5,16.4 132.3,16.7 133.1,12.4 133.9,10.7 134.7,8.7 135.5,8.5 136.3,7.3 137.2,7.8 138.0,4.6 138.8,3.5 139.6,2.2 140.4,2.1 141.2,1.9 142.0,0.8 142.8,1.7 143.7,2.4 144.5,1.0 145.3,1.7 146.1,2.7 146.9,4.2 147.7,0.6 148.5,10.9 149.3,7.7 150.1,9.2 151.0,10.5 151.8,6.8 152.6,4.4 153.4,7.0 154.2,8.4 155.0,7.6 155.8,8.2 156.6,12.2 157.4,3.7 158.3,0.0 159.1,3.1 159.9,0.6 160.7,1.8 161.5,5.5 162.3,6.7 163.1,6.4 163.9,1.6 164.8,4.0 165.6,2.1 166.4,6.8 167.2,12.5 168.0,11.2"/><circle cx="168" cy="11.2" r="2.4" class="sp-end"/></svg>
+        </header>
+        <div class="stats">
+          <div><span>P&amp;L since 2026-07-23</span>
+               <b class="gain">+$799k</b></div>
+          <div><span>Last 30 days</span>
+               <b class="loss">&minus;$301k</b></div>
+          <div><span>Deepest drawdown</span>
+               <b class="loss">&minus;$658k</b></div>
+          <div><span>Live sports risk</span><b>$142k</b></div>
+        </div>
+        <div class="lgs"><span class="lgbar"><b>Soccer</b> $127k</span><span class="lgbar"><b>Tennis</b> $15k</span><span class="lgbar"><b>NFL</b> $327</span><span class="lgbar"><b>College FB</b> $58</span><span class="lgbar"><b>MLB</b> $37</span></div>
+        <div class="tbl-wrap">
+          <table class="pos">
+            <thead><tr><th>Market</th><th>Their pick</th><th>Entry</th>
+              <th>Now</th><th>Value</th><th>Unrealised</th></tr></thead>
+            <tbody>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              FC Bayern M&#252;nchen vs. FK Bod&#248;/Glimt: O/U 5.5</td>
+            <td class="pick">Under</td>
+            <td class="num">0.639</td>
+            <td class="num">0.625</td>
+            <td class="num">$15k</td>
+            <td class="num loss">&minus;$344</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Exact Score: Fenerbah&#231;e SK 1 - 2 AS Roma?</td>
+            <td class="pick">No</td>
+            <td class="num">0.900</td>
+            <td class="num">0.895</td>
+            <td class="num">$8k</td>
+            <td class="num loss">&minus;$45</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Exact Score: PFK Dinamo Samarqand 0 - 2 Qizilqum Zarafshon?</td>
+            <td class="pick">No</td>
+            <td class="num">0.973</td>
+            <td class="num">0.976</td>
+            <td class="num">$7k</td>
+            <td class="num gain">+$18</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Tennis</span>
+              Antalya 4: Ane Mintegi Del Olmo vs Alicia Herrero Linana</td>
+            <td class="pick">Alicia Herrero Linana</td>
+            <td class="num">0.709</td>
+            <td class="num">0.986</td>
+            <td class="num">$6k</td>
+            <td class="num gain">+$2k</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Exact Score: Orsomarso SC 0 - 2 Tigres FC?</td>
+            <td class="pick">No</td>
+            <td class="num">0.964</td>
+            <td class="num">0.972</td>
+            <td class="num">$6k</td>
+            <td class="num gain">+$51</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Will Como 1907 win on 2026-09-10?</td>
+            <td class="pick">No</td>
+            <td class="num">0.445</td>
+            <td class="num">0.455</td>
+            <td class="num">$6k</td>
+            <td class="num gain">+$127</td>
+          </tr></tbody>
+          </table>
+        </div>
+        <p class="more">+426 further live positions not shown</p>
+      </article>
+      <article class="card">
+        <header class="card-hd">
+          <div>
+            <h3><a href="https://polymarket.com/profile/0xfe787d2da716d60e8acff57fb87eb13cd4d10319" target="_blank" rel="noopener">ferrariChampions2026</a></h3>
+            <p class="wallet">0xfe787d2da716d60e8acff57fb87eb13cd4d10319</p>
+          </div>
+          <svg class="spark gain" viewBox="0 0 168 40" width="168" height="40" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="39.0" x2="168" y2="39.0" class="sp-zero"/><polyline points="0.0,38.8 1.0,38.2 2.1,38.5 3.1,37.8 4.1,37.4 5.2,35.6 6.2,36.1 7.2,35.7 8.2,37.7 9.3,37.6 10.3,38.2 11.3,36.0 12.4,37.4 13.4,39.2 14.4,35.8 15.5,36.2 16.5,36.4 17.5,35.2 18.6,33.9 19.6,34.7 20.6,33.7 21.6,35.7 22.7,38.2 23.7,39.0 24.7,38.2 25.8,39.0 26.8,38.4 27.8,37.2 28.9,35.6 29.9,33.6 30.9,29.7 32.0,31.3 33.0,28.7 34.0,28.7 35.0,28.6 36.1,28.6 37.1,29.4 38.1,32.1 39.2,29.1 40.2,28.4 41.2,26.8 42.3,27.4 43.3,27.0 44.3,26.9 45.3,25.6 46.4,25.2 47.4,24.5 48.4,20.8 49.5,19.9 50.5,18.1 51.5,19.7 52.6,19.2 53.6,18.4 54.6,18.6 55.7,18.4 56.7,16.2 57.7,14.7 58.7,13.9 59.8,15.4 60.8,17.4 61.8,14.6 62.9,13.9 63.9,13.5 64.9,12.6 66.0,11.7 67.0,10.6 68.0,11.6 69.1,10.3 70.1,7.9 71.1,7.8 72.1,7.1 73.2,6.1 74.2,4.3 75.2,1.4 76.3,0.0 77.3,5.2 78.3,24.2 79.4,32.1 80.4,33.6 81.4,34.8 82.5,37.2 83.5,39.8 84.5,40.0 85.5,38.5 86.6,37.9 87.6,35.9 88.6,31.1 89.7,28.6 90.7,27.3 91.7,25.9 92.8,25.3 93.8,26.7 94.8,28.0 95.9,25.4 96.9,26.8 97.9,26.3 98.9,30.1 100.0,33.7 101.0,31.7 102.0,24.6 103.1,26.8 104.1,25.9 105.1,24.5 106.2,26.5 107.2,25.0 108.2,25.8 109.3,27.6 110.3,26.6 111.3,22.9 112.3,24.1 113.4,15.4 114.4,15.9 115.4,18.4 116.5,22.0 117.5,20.6 118.5,19.2 119.6,20.0 120.6,19.3 121.6,19.0 122.7,17.4 123.7,19.2 124.7,16.0 125.7,17.5 126.8,18.3 127.8,17.9 128.8,17.5 129.9,17.8 130.9,17.4 131.9,15.0 133.0,12.3 134.0,11.5 135.0,13.0 136.0,13.6 137.1,12.2 138.1,9.2 139.1,8.2 140.2,9.8 141.2,9.6 142.2,8.9 143.3,11.0 144.3,10.5 145.3,9.3 146.4,12.8 147.4,12.7 148.4,16.7 149.4,17.6 150.5,17.3 151.5,16.2 152.5,15.6 153.6,14.5 154.6,11.4 155.6,12.0 156.7,14.1 157.7,15.1 158.7,13.4 159.8,11.5 160.8,9.8 161.8,9.0 162.8,6.7 163.9,8.5 164.9,10.3 165.9,12.5 167.0,9.6 168.0,9.3"/><circle cx="168" cy="9.3" r="2.4" class="sp-end"/></svg>
+        </header>
+        <div class="stats">
+          <div><span>P&amp;L since 2026-07-23</span>
+               <b class="gain">+$2.72M</b></div>
+          <div><span>Last 30 days</span>
+               <b class="gain">+$259k</b></div>
+          <div><span>Deepest drawdown</span>
+               <b class="loss">&minus;$3.67M</b></div>
+          <div><span>Live sports risk</span><b>$134k</b></div>
+        </div>
+        <div class="lgs"><span class="lgbar"><b>Tennis</b> $78k</span><span class="lgbar"><b>MLB</b> $37k</span><span class="lgbar"><b>Soccer</b> $15k</span><span class="lgbar"><b>Esports</b> $2k</span><span class="lgbar"><b>Other sport</b> $1k</span></div>
+        <div class="tbl-wrap">
+          <table class="pos">
+            <thead><tr><th>Market</th><th>Their pick</th><th>Entry</th>
+              <th>Now</th><th>Value</th><th>Unrealised</th></tr></thead>
+            <tbody>
+          <tr>
+            <td class="mkt"><span class="lg">Tennis</span>
+              Monterrey Open: Maria Timofeeva vs Ann Li</td>
+            <td class="pick">Ann Li</td>
+            <td class="num">0.516</td>
+            <td class="num">0.500</td>
+            <td class="num">$27k</td>
+            <td class="num loss">&minus;$840</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">MLB</span>
+              Tampa Bay Rays vs. Atlanta Braves</td>
+            <td class="pick">Tampa Bay Rays</td>
+            <td class="num">0.480</td>
+            <td class="num">0.475</td>
+            <td class="num">$16k</td>
+            <td class="num loss">&minus;$160</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">MLB</span>
+              Tampa Bay Rays vs. Atlanta Braves: O/U 8.5</td>
+            <td class="pick">Under</td>
+            <td class="num">0.500</td>
+            <td class="num">0.515</td>
+            <td class="num">$11k</td>
+            <td class="num gain">+$321</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">MLB</span>
+              Spread: Atlanta Braves (-1.5)</td>
+            <td class="pick">Tampa Bay Rays</td>
+            <td class="num">0.660</td>
+            <td class="num">0.655</td>
+            <td class="num">$6k</td>
+            <td class="num loss">&minus;$47</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Tennis</span>
+              US Open WTA: Aryna Sabalenka vs Jessica Pegula</td>
+            <td class="pick">Jessica Pegula</td>
+            <td class="num">0.360</td>
+            <td class="num">0.355</td>
+            <td class="num">$6k</td>
+            <td class="num loss">&minus;$83</td>
+          </tr>
+          <tr>
+            <td class="mkt"><span class="lg">Soccer</span>
+              Spread: FC Bayern M&#252;nchen (-3.5)</td>
+            <td class="pick">FC Bayern M&#252;nchen</td>
+            <td class="num">0.430</td>
+            <td class="num">0.435</td>
+            <td class="num">$6k</td>
+            <td class="num gain">+$65</td>
+          </tr></tbody>
+          </table>
+        </div>
+        <p class="more">+77 further live positions not shown</p>
+      </article></div>
+</section>
+
+<section>
+  <h2>What they are backing together</h2>
+  <p class="sub">Every live position across all 25 wallets, grouped
+    by market and side. These are the 353 bets that two
+    or more of them are in at the same time &mdash; the closest thing this data
+    has to a consensus pick. "Drift" is how far the price has moved from their
+    combined average entry.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Wallets</th><th>Market</th><th>Side</th><th>Avg entry</th>
+        <th>Now</th><th>Drift</th><th>Combined stake</th><th>Unrealised</th>
+        <th>Who</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="num tally">6</td>
+        <td class="mkt"><span class="lg">NFL</span>
+          Spread: Rams (-3.5)</td>
+        <td class="pick">Rams</td>
+        <td class="num">0.510</td>
+        <td class="num">0.505</td>
+        <td class="num loss">-0.5&cent;</td>
+        <td class="num">$94k</td>
+        <td class="num loss">&minus;$916</td>
+        <td class="who-sm">wr0ngw4yb3tt0r, monkeymashingkeyb&#8230;, nigiri99 +3</td>
+      </tr>
+      <tr>
+        <td class="num tally">6</td>
+        <td class="mkt"><span class="lg">MLB</span>
+          Tampa Bay Rays vs. Atlanta Braves: O/U 8.5</td>
+        <td class="pick">Under</td>
+        <td class="num">0.500</td>
+        <td class="num">0.515</td>
+        <td class="num gain">+1.5&cent;</td>
+        <td class="num">$20k</td>
+        <td class="num gain">+$574</td>
+        <td class="who-sm">ferrariChampions2&#8230;, nigiri99, hi774c +3</td>
+      </tr>
+      <tr>
+        <td class="num tally">6</td>
+        <td class="mkt"><span class="lg">Soccer</span>
+          FC Bayern M&#252;nchen vs. FK Bod&#248;/Glimt: O/U 4.5</td>
+        <td class="pick">Under</td>
+        <td class="num">0.459</td>
+        <td class="num">0.445</td>
+        <td class="num loss">-1.4&cent;</td>
+        <td class="num">$6k</td>
+        <td class="num loss">&minus;$171</td>
+        <td class="who-sm">ferrariChampions2&#8230;, UpTheBlues, hi774c +3</td>
+      </tr>
+      <tr>
+        <td class="num tally">5</td>
+        <td class="mkt"><span class="lg">MLB</span>
+          Tampa Bay Rays vs. Atlanta Braves</td>
+        <td class="pick">Atlanta Braves</td>
+        <td class="num">0.521</td>
+        <td class="num">0.525</td>
+        <td class="num gain">+0.4&cent;</td>
+        <td class="num">$37k</td>
+        <td class="num gain">+$310</td>
+        <td class="who-sm">monkeymashingkeyb&#8230;, nigiri99, AnonymousUsername +2</td>
+      </tr>
+      <tr>
+        <td class="num tally">5</td>
+        <td class="mkt"><span class="lg">Tennis</span>
+          Genoa: Enrico Dalla Valle vs Stefano Travaglia</td>
+        <td class="pick">Enrico Dalla Valle</td>
+        <td class="num">0.466</td>
+        <td class="num">0.565</td>
+        <td class="num gain">+9.9&cent;</td>
+        <td class="num">$26k</td>
+        <td class="num loss">&minus;$242</td>
+        <td class="who-sm">0x78be&#8230;bde0, HomeRunHazard, UpTheBlues +2</td>
+      </tr>
+      <tr>
+        <td class="num tally">5</td>
+        <td class="mkt"><span class="lg">Soccer</span>
+          Spread: FC Cincinnati (-1.5)</td>
+        <td class="pick">D.C. United SC</td>
+        <td class="num">0.620</td>
+        <td class="num">0.790</td>
+        <td class="num gain">+17.0&cent;</td>
+        <td class="num">$12k</td>
+        <td class="num gain">+$3k</td>
+        <td class="who-sm">AnonymousUsername, VeryLucky888, ferrariChampions2&#8230; +2</td>
+      </tr>
+      <tr>
+        <td class="num tally">5</td>
+        <td class="mkt"><span class="lg">Tennis</span>
+          US Open WTA: Aryna Sabalenka vs Jessica Pegula</td>
+        <td class="pick">Jessica Pegula</td>
+        <td class="num">0.356</td>
+        <td class="num">0.355</td>
+        <td class="num loss">-0.1&cent;</td>
+        <td class="num">$10k</td>
+        <td class="num loss">&minus;$32</td>
+        <td class="who-sm">ferrariChampions2&#8230;, hi774c, VeryLucky888 +2</td>
+      </tr>
+      <tr>
+        <td class="num tally">5</td>
+        <td class="mkt"><span class="lg">NFL</span>
+          49ers vs. Rams: O/U 48.5</td>
+        <td class="pick">Over</td>
+        <td class="num">0.470</td>
+        <td class="num">0.465</td>
+        <td class="num loss">-0.5&cent;</td>
+        <td class="num">$4k</td>
+        <td class="num loss">&minus;$51</td>
+        <td class="who-sm">nigiri99, VeryLucky888, wapol +2</td>
+      </tr>
+      <tr>
+        <td class="num tally">4</td>
+        <td class="mkt"><span class="lg">Soccer</span>
+          Will Como 1907 win on 2026-09-10?</td>
+        <td class="pick">No</td>
+        <td class="num">0.446</td>
+        <td class="num">0.455</td>
+        <td class="num gain">+0.9&cent;</td>
+        <td class="num">$36k</td>
+        <td class="num gain">+$719</td>
+        <td class="who-sm">Flaznorp, VeryLucky888, UpTheBlues +1</td>
+      </tr>
+      <tr>
+        <td class="num tally">4</td>
+        <td class="mkt"><span class="lg">Soccer</span>
+          FC Bayern M&#252;nchen vs. FK Bod&#248;/Glimt: O/U 5.5</td>
+        <td class="pick">Under</td>
+        <td class="num">0.639</td>
+        <td class="num">0.625</td>
+        <td class="num loss">-1.4&cent;</td>
+        <td class="num">$32k</td>
+        <td class="num loss">&minus;$728</td>
+        <td class="who-sm">Flaznorp, UpTheBlues, nigiri99 +1</td>
+      </tr>
+      <tr>
+        <td class="num tally">4</td>
+        <td class="mkt"><span class="lg">Tennis</span>
+          Antalya 4: Ane Mintegi Del Olmo vs Alicia Herrero Linana</td>
+        <td class="pick">Alicia Herrero Linana</td>
+        <td class="num">0.810</td>
+        <td class="num">0.965</td>
+        <td class="num gain">+15.5&cent;</td>
+        <td class="num">$27k</td>
+        <td class="num gain">+$5k</td>
+        <td class="who-sm">Flaznorp, UpTheBlues, HomeRunHazard +1</td>
+      </tr>
+      <tr>
+        <td class="num tally">4</td>
+        <td class="mkt"><span class="lg">Soccer</span>
+          Will FC Cincinnati win on 2026-09-05?</td>
+        <td class="pick">No</td>
+        <td class="num">0.400</td>
+        <td class="num">0.675</td>
+        <td class="num gain">+27.5&cent;</td>
+        <td class="num">$21k</td>
+        <td class="num gain">+$8k</td>
+        <td class="who-sm">AnonymousUsername, VeryLucky888, Flaznorp +1</td>
+      </tr>
+      <tr>
+        <td class="num tally">4</td>
+        <td class="mkt"><span class="lg">Soccer</span>
+          Will PSV win on 2026-09-10?</td>
+        <td class="pick">No</td>
+        <td class="num">0.339</td>
+        <td class="num">0.345</td>
+        <td class="num gain">+0.6&cent;</td>
+        <td class="num">$10k</td>
+        <td class="num gain">+$158</td>
+        <td class="who-sm">VeryLucky888, Flaznorp, UpTheBlues +1</td>
+      </tr>
+      <tr>
+        <td class="num tally">4</td>
+        <td class="mkt"><span class="lg">MLB</span>
+          Houston Astros vs. Philadelphia Phillies: O/U 8.5</td>
+        <td class="pick">Over</td>
+        <td class="num">0.498</td>
+        <td class="num">0.495</td>
+        <td class="num loss">-0.3&cent;</td>
+        <td class="num">$6k</td>
+        <td class="num loss">&minus;$34</td>
+        <td class="who-sm">nigiri99, HomeRunHazard, wapol +1</td>
+      </tr>
+      <tr>
+        <td class="num tally">4</td>
+        <td class="mkt"><span class="lg">MLB</span>
+          Colorado Rockies vs. New York Yankees: O/U 8.5</td>
+        <td class="pick">Over</td>
+        <td class="num">0.518</td>
+        <td class="num">0.505</td>
+        <td class="num loss">-1.3&cent;</td>
+        <td class="num">$6k</td>
+        <td class="num loss">&minus;$148</td>
+        <td class="who-sm">HomeRunHazard, AnonymousUsername, nigiri99 +1</td>
+      </tr>
+      <tr>
+        <td class="num tally">4</td>
+        <td class="mkt"><span class="lg">Soccer</span>
+          Spread: Como 1907 (-1.5)</td>
+        <td class="pick">RB Leipzig</td>
+        <td class="num">0.674</td>
+        <td class="num">0.675</td>
+        <td class="num gain">+0.1&cent;</td>
+        <td class="num">$5k</td>
+        <td class="num gain">+$10</td>
+        <td class="who-sm">UpTheBlues, Flaznorp, VeryLucky888 +1</td>
+      </tr></tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Where they disagree</h2>
+  <p class="sub">Markets where top wallets hold opposite sides of the same
+    question. One side of each pair is wrong, and both got there with money
+    on the table.</p>
+  <div class="vs-grid">
+      <article class="vs">
+        <p class="vs-mkt"><span class="lg">Esports</span>
+          Counter-Strike: Alliance vs magic (BO3) - FISSURE PLAYGROUND Group B</p>
+        <div class="legs">
+          <div class="leg">
+            <div class="leg-hd"><b>magic</b>
+              <span class="num">0.155</span></div>
+            <p class="num leg-v">$273k &middot;
+              1 wallet
+              &middot; entry 0.391</p>
+            <p class="leg-w">Noprajsk</p>
+          </div>
+          <div class="leg">
+            <div class="leg-hd"><b>Alliance</b>
+              <span class="num">0.845</span></div>
+            <p class="num leg-v">$378 &middot;
+              2 wallets
+              &middot; entry 0.564</p>
+            <p class="leg-w">Flaznorp, nigiri99</p>
+          </div></div>
+      </article>
+      <article class="vs">
+        <p class="vs-mkt"><span class="lg">NFL</span>
+          Spread: Rams (-3.5)</p>
+        <div class="legs">
+          <div class="leg">
+            <div class="leg-hd"><b>49ers</b>
+              <span class="num">0.495</span></div>
+            <p class="num leg-v">$111k &middot;
+              3 wallets
+              &middot; entry 0.489</p>
+            <p class="leg-w">Kch-Temp, wr0ngw4yb3tt0r, HomeRunHazard</p>
+          </div>
+          <div class="leg">
+            <div class="leg-hd"><b>Rams</b>
+              <span class="num">0.505</span></div>
+            <p class="num leg-v">$94k &middot;
+              6 wallets
+              &middot; entry 0.510</p>
+            <p class="leg-w">wr0ngw4yb3tt0r, Herdonia, nigiri99</p>
+          </div></div>
+      </article>
+      <article class="vs">
+        <p class="vs-mkt"><span class="lg">Soccer</span>
+          Will FC Bayern M&#252;nchen win on 2026-09-10?</p>
+        <div class="legs">
+          <div class="leg">
+            <div class="leg-hd"><b>Yes</b>
+              <span class="num">0.905</span></div>
+            <p class="num leg-v">$77k &middot;
+              1 wallet
+              &middot; entry 0.898</p>
+            <p class="leg-w">nigiri99</p>
+          </div>
+          <div class="leg">
+            <div class="leg-hd"><b>No</b>
+              <span class="num">0.095</span></div>
+            <p class="num leg-v">$35 &middot;
+              2 wallets
+              &middot; entry 0.101</p>
+            <p class="leg-w">nigiri99, UpTheBlues</p>
+          </div></div>
+      </article>
+      <article class="vs">
+        <p class="vs-mkt"><span class="lg">MLB</span>
+          Tampa Bay Rays vs. Atlanta Braves</p>
+        <div class="legs">
+          <div class="leg">
+            <div class="leg-hd"><b>Atlanta Braves</b>
+              <span class="num">0.525</span></div>
+            <p class="num leg-v">$37k &middot;
+              5 wallets
+              &middot; entry 0.521</p>
+            <p class="leg-w">AnonymousUsername, Herdonia, nigiri99</p>
+          </div>
+          <div class="leg">
+            <div class="leg-hd"><b>Tampa Bay Rays</b>
+              <span class="num">0.475</span></div>
+            <p class="num leg-v">$16k &middot;
+              2 wallets
+              &middot; entry 0.480</p>
+            <p class="leg-w">ferrariChampions2&#8230;, Herdonia</p>
+          </div></div>
+      </article>
+      <article class="vs">
+        <p class="vs-mkt"><span class="lg">NFL</span>
+          49ers vs. Rams</p>
+        <div class="legs">
+          <div class="leg">
+            <div class="leg-hd"><b>49ers</b>
+              <span class="num">0.355</span></div>
+            <p class="num leg-v">$41k &middot;
+              2 wallets
+              &middot; entry 0.350</p>
+            <p class="leg-w">Kch-Temp, nigiri99</p>
+          </div>
+          <div class="leg">
+            <div class="leg-hd"><b>Rams</b>
+              <span class="num">0.645</span></div>
+            <p class="num leg-v">$4k &middot;
+              1 wallet
+              &middot; entry 0.650</p>
+            <p class="leg-w">Herdonia</p>
+          </div></div>
+      </article>
+      <article class="vs">
+        <p class="vs-mkt"><span class="lg">Soccer</span>
+          Will Como 1907 win on 2026-09-10?</p>
+        <div class="legs">
+          <div class="leg">
+            <div class="leg-hd"><b>No</b>
+              <span class="num">0.455</span></div>
+            <p class="num leg-v">$36k &middot;
+              4 wallets
+              &middot; entry 0.446</p>
+            <p class="leg-w">ferrariChampions2&#8230;, Flaznorp, UpTheBlues</p>
+          </div>
+          <div class="leg">
+            <div class="leg-hd"><b>Yes</b>
+              <span class="num">0.545</span></div>
+            <p class="num leg-v">$4k &middot;
+              1 wallet
+              &middot; entry 0.535</p>
+            <p class="leg-w">nigiri99</p>
+          </div></div>
+      </article></div>
+</section>
+
+<section>
+  <h2>Does it hold up over time?</h2>
+  
+  <p class="sub">64 snapshots spanning 15.8 days.
+    "Earned while tracked" is the change in a wallet's cumulative P&amp;L between
+    its first and last appearance &mdash; money made while being watched, not a
+    leaderboard placing.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Trader</th><th>Snapshots</th><th>Best rank</th>
+        <th>Earned while tracked</th><th>Cumulative</th><th>First seen</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="who">pleaseplease123</td>
+        <td class="num tally">34</td>
+        <td class="num">1</td>
+        <td class="num gain">
+          +$415k</td>
+        <td class="num loss">&minus;$44k</td>
+        <td class="num-sm">2026-08-25</td>
+      </tr>
+      <tr>
+        <td class="who">Sassy-Bucket</td>
+        <td class="num tally">31</td>
+        <td class="num">1</td>
+        <td class="num gain">
+          +$80k</td>
+        <td class="num loss">&minus;$2.13M</td>
+        <td class="num-sm">2026-08-25</td>
+      </tr>
+      <tr>
+        <td class="who">Flaznorp</td>
+        <td class="num tally">29</td>
+        <td class="num">2</td>
+        <td class="num gain">
+          +$830k</td>
+        <td class="num gain">+$888k</td>
+        <td class="num-sm">2026-08-26</td>
+      </tr>
+      <tr>
+        <td class="who">ferrariChampions2&#8230;</td>
+        <td class="num tally">28</td>
+        <td class="num">2</td>
+        <td class="num gain">
+          +$617k</td>
+        <td class="num gain">+$2.72M</td>
+        <td class="num-sm">2026-08-25</td>
+      </tr>
+      <tr>
+        <td class="who">AV23IUa</td>
+        <td class="num tally">28</td>
+        <td class="num">1</td>
+        <td class="num loss">
+          &minus;$114k</td>
+        <td class="num loss">&minus;$340k</td>
+        <td class="num-sm">2026-08-25</td>
+      </tr>
+      <tr>
+        <td class="who">nigiri99</td>
+        <td class="num tally">27</td>
+        <td class="num">1</td>
+        <td class="num gain">
+          +$910k</td>
+        <td class="num gain">+$378k</td>
+        <td class="num-sm">2026-08-26</td>
+      </tr>
+      <tr>
+        <td class="who">0x2c33&#8230;0563</td>
+        <td class="num tally">27</td>
+        <td class="num">1</td>
+        <td class="num gain">
+          +$359k</td>
+        <td class="num gain">+$7.68M</td>
+        <td class="num-sm">2026-08-26</td>
+      </tr>
+      <tr>
+        <td class="who">wr0ngw4yb3tt0r</td>
+        <td class="num tally">24</td>
+        <td class="num">1</td>
+        <td class="num gain">
+          +$355k</td>
+        <td class="num loss">&minus;$4.46M</td>
+        <td class="num-sm">2026-08-26</td>
+      </tr>
+      <tr>
+        <td class="who">RN1</td>
+        <td class="num tally">22</td>
+        <td class="num">4</td>
+        <td class="num gain">
+          +$520k</td>
+        <td class="num gain">+$13.25M</td>
+        <td class="num-sm">2026-08-25</td>
+      </tr>
+      <tr>
+        <td class="who">xifutloong3</td>
+        <td class="num tally">21</td>
+        <td class="num">1</td>
+        <td class="num gain">
+          +$158k</td>
+        <td class="num gain">+$224k</td>
+        <td class="num-sm">2026-08-26</td>
+      </tr>
+      <tr>
+        <td class="who">BrotherObama</td>
+        <td class="num tally">20</td>
+        <td class="num">1</td>
+        <td class="num gain">
+          +$143k</td>
+        <td class="num gain">+$413k</td>
+        <td class="num-sm">2026-08-25</td>
+      </tr>
+      <tr>
+        <td class="who">Feromont</td>
+        <td class="num tally">19</td>
+        <td class="num">4</td>
+        <td class="num gain">
+          +$169k</td>
+        <td class="num loss">&minus;$2.32M</td>
+        <td class="num-sm">2026-08-25</td>
+      </tr>
+      <tr>
+        <td class="who">HomeRunHazard</td>
+        <td class="num tally">19</td>
+        <td class="num">2</td>
+        <td class="num gain">
+          +$151k</td>
+        <td class="num gain">+$2.44M</td>
+        <td class="num-sm">2026-08-26</td>
+      </tr>
+      <tr>
+        <td class="who">UpTheBlues</td>
+        <td class="num tally">19</td>
+        <td class="num">3</td>
+        <td class="num loss">
+          &minus;$146k</td>
+        <td class="num gain">+$799k</td>
+        <td class="num-sm">2026-08-25</td>
+      </tr>
+      <tr>
+        <td class="who">0x3DFb&#8230;abAf</td>
+        <td class="num tally">19</td>
+        <td class="num">1</td>
+        <td class="num loss">
+          &minus;$605k</td>
+        <td class="num loss">&minus;$2.35M</td>
+        <td class="num-sm">2026-08-26</td>
+      </tr>
+      <tr>
+        <td class="who">IcemanSeason</td>
+        <td class="num tally">18</td>
+        <td class="num">1</td>
+        <td class="num gain">
+          +$88k</td>
+        <td class="num gain">+$96k</td>
+        <td class="num-sm">2026-08-25</td>
+      </tr>
+      <tr>
+        <td class="who">0x076daa87&#8230;</td>
+        <td class="num tally">18</td>
+        <td class="num">6</td>
+        <td class="num loss">
+          &minus;$36k</td>
+        <td class="num gain">+$3.74M</td>
+        <td class="num-sm">2026-08-25</td>
+      </tr>
+      <tr>
+        <td class="who">beachboy4</td>
+        <td class="num tally">17</td>
+        <td class="num">1</td>
+        <td class="num gain">
+          +$1.16M</td>
+        <td class="num gain">+$6.19M</td>
+        <td class="num-sm">2026-08-30</td>
+      </tr>
+      <tr>
+        <td class="who">Talvez10</td>
+        <td class="num tally">17</td>
+        <td class="num">2</td>
+        <td class="num gain">
+          +$545k</td>
+        <td class="num gain">+$2.20M</td>
+        <td class="num-sm">2026-08-26</td>
+      </tr>
+      <tr>
+        <td class="who">0x78becf0a&#8230;</td>
+        <td class="num tally">17</td>
+        <td class="num">1</td>
+        <td class="num gain">
+          +$309k</td>
+        <td class="num gain">+$322k</td>
+        <td class="num-sm">2026-09-03</td>
+      </tr></tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>When this page updates</h2>
+  <p class="sub">The whole page is rebuilt from scratch on a schedule &mdash;
+    three times a day, plus extra runs around football kickoffs, when positions
+    are opened and settled inside a few hours. Times are CDT, and the next one is shown in your own timezone.</p>
+  <p class="nextrun" id="nextrun"
+     data-runs="2026-09-10T20:00:00+00:00|2026-09-11T02:00:00+00:00|2026-09-11T14:00:00+00:00|2026-09-11T20:00:00+00:00|2026-09-12T02:00:00+00:00|2026-09-12T14:00:00+00:00|2026-09-12T16:00:00+00:00|2026-09-12T20:00:00+00:00|2026-09-12T23:00:00+00:00|2026-09-13T02:00:00+00:00|2026-09-13T04:30:00+00:00|2026-09-13T14:00:00+00:00|2026-09-13T16:30:00+00:00|2026-09-13T20:00:00+00:00|2026-09-13T23:00:00+00:00|2026-09-14T02:00:00+00:00|2026-09-14T04:00:00+00:00|2026-09-14T14:00:00+00:00|2026-09-14T20:00:00+00:00|2026-09-15T02:00:00+00:00|2026-09-15T14:00:00+00:00|2026-09-15T20:00:00+00:00|2026-09-16T02:00:00+00:00|2026-09-16T14:00:00+00:00|2026-09-16T20:00:00+00:00|2026-09-17T02:00:00+00:00|2026-09-17T14:00:00+00:00|2026-09-17T20:00:00+00:00|2026-09-18T02:00:00+00:00">&nbsp;</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Day</th><th>Time</th><th>Why then</th></tr></thead>
+      <tbody>
+      <tr>
+        <td class="who">Every day</td>
+        <td class="num">9:00 am CDT</td>
+        <td class="mkt">Before the midday activity peak</td>
+      </tr>
+      <tr>
+        <td class="who">Every day</td>
+        <td class="num">3:00 pm CDT</td>
+        <td class="mkt">Soccer and tennis settling</td>
+      </tr>
+      <tr>
+        <td class="who">Every day</td>
+        <td class="num">9:00 pm CDT</td>
+        <td class="mkt">US evening games settled</td>
+      </tr>
+      <tr>
+        <td class="who">Saturdays</td>
+        <td class="num">11:00 am CDT</td>
+        <td class="mkt">Before the NCAA early slate</td>
+      </tr>
+      <tr>
+        <td class="who">Saturdays</td>
+        <td class="num">6:00 pm CDT</td>
+        <td class="mkt">NCAA primetime kickoff</td>
+      </tr>
+      <tr>
+        <td class="who">Saturdays</td>
+        <td class="num">11:30 pm CDT</td>
+        <td class="mkt">After NCAA primetime</td>
+      </tr>
+      <tr>
+        <td class="who">Sundays</td>
+        <td class="num">11:30 am CDT</td>
+        <td class="mkt">Before the NFL early slate</td>
+      </tr>
+      <tr>
+        <td class="who">Sundays</td>
+        <td class="num">6:00 pm CDT</td>
+        <td class="mkt">NFL late slate, pre-SNF</td>
+      </tr>
+      <tr>
+        <td class="who">Sundays</td>
+        <td class="num">11:00 pm CDT</td>
+        <td class="mkt">During Sunday Night Football</td>
+      </tr></tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Where the money sits</h2>
+  <p class="sub">Live exposure across 25 wallets, by sport.</p>
+  <div class="tbl-wrap" style="padding:16px 20px"><div class="lrow"><span>Soccer</span><div class="bar"><i style="width:100.0%"></i></div><b>$1.60M</b></div><div class="lrow"><span>NFL</span><div class="bar"><i style="width:24.3%"></i></div><b>$388k</b></div><div class="lrow"><span>Tennis</span><div class="bar"><i style="width:18.2%"></i></div><b>$291k</b></div><div class="lrow"><span>Esports</span><div class="bar"><i style="width:17.8%"></i></div><b>$285k</b></div><div class="lrow"><span>MLB</span><div class="bar"><i style="width:11.8%"></i></div><b>$188k</b></div><div class="lrow"><span>College FB</span><div class="bar"><i style="width:3.6%"></i></div><b>$58k</b></div><div class="lrow"><span>NBA</span><div class="bar"><i style="width:3.0%"></i></div><b>$48k</b></div><div class="lrow"><span>UFC/MMA</span><div class="bar"><i style="width:2.6%"></i></div><b>$42k</b></div><div class="lrow"><span>Other sport</span><div class="bar"><i style="width:1.4%"></i></div><b>$23k</b></div><div class="lrow"><span>Cricket</span><div class="bar"><i style="width:0.1%"></i></div><b>$872</b></div><div class="lrow"><span>Boxing</span><div class="bar"><i style="width:0.0%"></i></div><b>$344</b></div></div>
+</section>
+
+<section>
+  <h2>The Kalshi cross-check</h2>
+  <p class="sub">Kalshi's public tape is fully anonymous &mdash; a trade carries
+    no account, so there is no Kalshi leaderboard to build. What it can do is
+    price the same match independently. Across 4 matchups these
+    whales hold, the two venues agree to a median of
+    <b>0.5&cent;</b>,
+    with 4 inside 2&cent;. "Yes-taker" is the share of Kalshi volume
+    lifting that side &mdash; crowd direction, not identity.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Match</th><th>Side</th><th>Polymarket</th><th>Kalshi</th>
+        <th>Gap</th><th>Yes-taker</th><th>Whale stake</th><th>Held by</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="mkt">US Open WTA: Coco Gauff vs Elena Rybakina</td>
+        <td class="pick">Coco Gauff</td>
+        <td class="num">0.495</td>
+        <td class="num">0.480</td>
+        <td class="num loss">-1.5&cent;</td>
+        <td class="num">72%</td>
+        <td class="num">$11k</td>
+        <td class="who-sm">Kch-Temp, AnonymousUsername +1</td>
+      </tr>
+      <tr>
+        <td class="mkt">US Open WTA: Aryna Sabalenka vs Jessica Pegula</td>
+        <td class="pick">Jessica Pegula</td>
+        <td class="num">0.355</td>
+        <td class="num">0.360</td>
+        <td class="num gain">+0.5&cent;</td>
+        <td class="num">85%</td>
+        <td class="num">$10k</td>
+        <td class="who-sm">ferrariChampions2&#8230;, hi774c +3</td>
+      </tr>
+      <tr>
+        <td class="mkt">US Open ATP: Frances Tiafoe vs Ben Shelton</td>
+        <td class="pick">Frances Tiafoe</td>
+        <td class="num">0.265</td>
+        <td class="num">0.270</td>
+        <td class="num gain">+0.5&cent;</td>
+        <td class="num">88%</td>
+        <td class="num">$2k</td>
+        <td class="who-sm">hi774c</td>
+      </tr>
+      <tr>
+        <td class="mkt">US Open ATP: Frances Tiafoe vs Ben Shelton</td>
+        <td class="pick">Ben Shelton</td>
+        <td class="num">0.735</td>
+        <td class="num">0.740</td>
+        <td class="num gain">+0.5&cent;</td>
+        <td class="num">84%</td>
+        <td class="num">$1k</td>
+        <td class="who-sm">VeryLucky888</td>
+      </tr></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="method">
+  <h2>How this was built, and where it is soft</h2>
+
+  <details open><summary>Historical P&amp;L comes from equity curves, not summed positions</summary>
+    <p>Polymarket's <code>/positions</code> endpoint returns resolved-but-unredeemed
+    positions alongside live ones, and winners disappear from it once redeemed
+    while worthless losers linger indefinitely. Summing profit across that list
+    is severely biased &mdash; for one wallet here it implied a &minus;$8.9M loss
+    against $198k of actual exposure. Lifetime figures therefore come from the
+    daily equity curve API, and <code>/positions</code> is used only to read
+    what is open right now, filtered to markets still trading between 0 and 1.</p></details>
+
+  <details><summary>"Lifetime" means 51 days, not all time</summary>
+    <p>The equity-curve API returns roughly 51 days of daily history
+    (from 2026-07-23), so every lifetime figure is bounded by that
+    window. A wallet that made its money before then will understate. Max
+    drawdown is peak-to-trough within the same window.</p></details>
+
+  <details><summary>The sports leaderboard is a short rolling window</summary>
+    <p>Ranking comes from Polymarket's own <code>category=sports</code>
+    leaderboard, which reflects a short recent window rather than all-time
+    performance. That mismatch is the point of the page, but it does mean the
+    ranking will look different tomorrow.</p></details>
+
+  <details><summary>Sport classification is tag-based</summary>
+    <p>Each position is classified by its Gamma event tags, falling back to slug
+    prefixes when an event is untagged. Markets tagged only with a league and
+    not with <code>sports</code> are still captured; genuinely untagged
+    exotic markets may be missed.</p></details>
+
+  <details><summary>Cross-venue gaps are timing, not free money</summary>
+    <p>Polymarket prices are read at the snapshot time above; Kalshi prices are
+    that market's last trade. On an in-play match both move fast, so a large gap
+    usually reflects the minutes between the two reads rather than a real
+    arbitrage. Matches are joined on the pair of players plus the date encoded in
+    the Kalshi ticker &mdash; joining on a single player name silently pairs live
+    matches against ones that settled weeks earlier.</p></details>
+
+  <details><summary>"Consensus" means consensus among these 25 wallets</summary>
+    <p>Shared trades are computed across the profiled wallets only, not the
+    whole exchange. Two of them on the same side is a coincidence as often as a
+    signal, and several may be following the same public model or belong to one
+    operator. Markets are grouped by condition ID, so both sides of one question
+    group together &mdash; that is what makes the disagreements above
+    detectable.</p></details>
+
+  <details><summary>Persistence needs repeated runs to mean anything</summary>
+    <p>Each run appends every ranked wallet's cumulative P&amp;L to
+    <code>snapshots.jsonl</code>. Differencing that between runs gives what a
+    wallet earned in the gap, which is resistant to the one-good-day effect that
+    dominates the leaderboard. It requires at least two runs spaced far enough
+    apart to contain real trading, and it only tracks wallets that keep
+    appearing in the top 50 &mdash; a wallet that drops off the board stops
+    being sampled, so long-run figures are survivor-weighted.</p></details>
+
+  <details><summary>Position sizes are visible; intent is not</summary>
+    <p>A wallet may be hedged elsewhere, market-making rather than betting a
+    view, or one of several controlled by the same person. Public wallets show
+    what was traded, never why.</p></details>
+</section>
+
+<footer>
+  <p>Built from Polymarket's public Gamma, data and user-PnL APIs and Kalshi's
+  public trade tape. Figures are a point-in-time snapshot taken 10 Sep 2026, 14:03 UTC and move
+  continuously. Informational only &mdash; nothing here is betting or investment
+  advice.</p>
+</footer>
+
+<script>
+/* The build runs on a schedule, so a page that stopped updating looks exactly
+   like one that just refreshed. Compute age in the viewer's browser and say it
+   plainly - stale data on a betting page is worse than no data. */
+(function () {
+  var el = document.getElementById("fresh");
+  if (!el) return;
+  var t = Date.parse(el.getAttribute("data-generated"));
+  if (isNaN(t)) return;
+  function tick() {
+    var mins = Math.max(0, Math.round((Date.now() - t) / 60000));
+    var ago = mins < 1 ? "just now"
+            : mins < 60 ? mins + " min ago"
+            : mins < 1440 ? Math.round(mins / 60) + "h ago"
+            : Math.round(mins / 1440) + "d ago";
+    el.textContent = "Updated " + ago;
+    var runsEl = document.getElementById("nextrun");
+    var first = runsEl ? Date.parse((runsEl.getAttribute("data-runs") || "").split("|")[0]) : NaN;
+    var overdue = !isNaN(first) && Date.now() - first > 30 * 60 * 1000;
+    el.classList.toggle("stale", overdue || mins > 720);
+    el.title = new Date(t).toUTCString();
+  }
+  tick();
+  setInterval(tick, 60000);
+})();
+
+/* Show the next scheduled rebuild in the viewer's own timezone - a schedule
+   quoted only in ET is guesswork for anyone reading from elsewhere. */
+(function () {
+  var el = document.getElementById("nextrun");
+  if (!el) return;
+  var runs = (el.getAttribute("data-runs") || "").split("|").filter(Boolean);
+  function tick() {
+    var now = Date.now(), next = null;
+    for (var i = 0; i < runs.length; i++) {
+      var t = Date.parse(runs[i]);
+      if (!isNaN(t) && t > now) { next = t; break; }
+    }
+    if (next === null) {
+      el.textContent = "Update overdue — the last scheduled run did not report in";
+      el.classList.add("overdue");
+      return;
+    }
+    var mins = Math.round((next - now) / 60000);
+    var when = mins < 60 ? "in " + mins + " min"
+             : mins < 1440 ? "in " + Math.round(mins / 60) + "h"
+             : "in " + Math.round(mins / 1440) + "d";
+    var local = new Date(next).toLocaleString(undefined,
+      { weekday: "short", hour: "numeric", minute: "2-digit" });
+    el.textContent = "Next update " + when + " — " + local + " your time";
+  }
+  tick();
+  setInterval(tick, 30000);
+})();
+</script>
+
+</div>
